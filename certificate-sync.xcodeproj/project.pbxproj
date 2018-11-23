@@ -3,11 +3,17 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		C9BB23EC219CE3C800CCE007 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23EB219CE3C800CCE007 /* main.swift */; };
+		C9BB23F421A628B200CCE007 /* configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F321A628B200CCE007 /* configuration_item.swift */; };
+		C9BB23F621A73E4E00CCE007 /* configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F521A73E4E00CCE007 /* configuration.swift */; };
+		C9BB23F821A73E9400CCE007 /* export_configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F721A73E9400CCE007 /* export_configuration_item.swift */; };
+		C9BB23FA21A73E9C00CCE007 /* acl_configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F921A73E9C00CCE007 /* acl_configuration_item.swift */; };
+		C9BB23FC21A76F5000CCE007 /* string_extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FB21A76F5000CCE007 /* string_extensions.swift */; };
+		C9BB23FE21A77DA200CCE007 /* syncronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FD21A77DA200CCE007 /* syncronizer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +31,13 @@
 /* Begin PBXFileReference section */
 		C9BB23E8219CE3C800CCE007 /* certificate-sync */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "certificate-sync"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9BB23EB219CE3C800CCE007 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		C9BB23F221A6270200CCE007 /* configuration.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = configuration.plist; sourceTree = "<group>"; };
+		C9BB23F321A628B200CCE007 /* configuration_item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = configuration_item.swift; sourceTree = "<group>"; };
+		C9BB23F521A73E4E00CCE007 /* configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = configuration.swift; sourceTree = "<group>"; };
+		C9BB23F721A73E9400CCE007 /* export_configuration_item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = export_configuration_item.swift; sourceTree = "<group>"; };
+		C9BB23F921A73E9C00CCE007 /* acl_configuration_item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = acl_configuration_item.swift; sourceTree = "<group>"; };
+		C9BB23FB21A76F5000CCE007 /* string_extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = string_extensions.swift; sourceTree = "<group>"; };
+		C9BB23FD21A77DA200CCE007 /* syncronizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = syncronizer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +71,13 @@
 			isa = PBXGroup;
 			children = (
 				C9BB23EB219CE3C800CCE007 /* main.swift */,
+				C9BB23F221A6270200CCE007 /* configuration.plist */,
+				C9BB23F321A628B200CCE007 /* configuration_item.swift */,
+				C9BB23F521A73E4E00CCE007 /* configuration.swift */,
+				C9BB23F721A73E9400CCE007 /* export_configuration_item.swift */,
+				C9BB23F921A73E9C00CCE007 /* acl_configuration_item.swift */,
+				C9BB23FB21A76F5000CCE007 /* string_extensions.swift */,
+				C9BB23FD21A77DA200CCE007 /* syncronizer.swift */,
 			);
 			path = "certificate-sync";
 			sourceTree = "<group>";
@@ -98,7 +118,7 @@
 				};
 			};
 			buildConfigurationList = C9BB23E3219CE3C800CCE007 /* Build configuration list for PBXProject "certificate-sync" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 10.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -119,7 +139,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C9BB23FE21A77DA200CCE007 /* syncronizer.swift in Sources */,
+				C9BB23FC21A76F5000CCE007 /* string_extensions.swift in Sources */,
+				C9BB23FA21A73E9C00CCE007 /* acl_configuration_item.swift in Sources */,
 				C9BB23EC219CE3C800CCE007 /* main.swift in Sources */,
+				C9BB23F821A73E9400CCE007 /* export_configuration_item.swift in Sources */,
+				C9BB23F621A73E4E00CCE007 /* configuration.swift in Sources */,
+				C9BB23F421A628B200CCE007 /* configuration_item.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

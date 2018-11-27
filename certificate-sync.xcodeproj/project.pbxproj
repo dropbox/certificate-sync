@@ -14,6 +14,7 @@
 		C9BB23FA21A73E9C00CCE007 /* acl_configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F921A73E9C00CCE007 /* acl_configuration_item.swift */; };
 		C9BB23FC21A76F5000CCE007 /* string_extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FB21A76F5000CCE007 /* string_extensions.swift */; };
 		C9BB23FE21A77DA200CCE007 /* syncronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FD21A77DA200CCE007 /* syncronizer.swift */; };
+		C9BB240621ABE6A000CCE007 /* test_suite.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB240521ABE6A000CCE007 /* test_suite.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,10 +39,20 @@
 		C9BB23F921A73E9C00CCE007 /* acl_configuration_item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = acl_configuration_item.swift; sourceTree = "<group>"; };
 		C9BB23FB21A76F5000CCE007 /* string_extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = string_extensions.swift; sourceTree = "<group>"; };
 		C9BB23FD21A77DA200CCE007 /* syncronizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = syncronizer.swift; sourceTree = "<group>"; };
+		C9BB240321ABE6A000CCE007 /* test-suite.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "test-suite.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9BB240521ABE6A000CCE007 /* test_suite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = test_suite.swift; sourceTree = "<group>"; };
+		C9BB240721ABE6A000CCE007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		C9BB23E5219CE3C800CCE007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9BB240021ABE6A000CCE007 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -55,6 +66,7 @@
 			isa = PBXGroup;
 			children = (
 				C9BB23EA219CE3C800CCE007 /* certificate-sync */,
+				C9BB240421ABE6A000CCE007 /* test-suite */,
 				C9BB23E9219CE3C800CCE007 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -63,6 +75,7 @@
 			isa = PBXGroup;
 			children = (
 				C9BB23E8219CE3C800CCE007 /* certificate-sync */,
+				C9BB240321ABE6A000CCE007 /* test-suite.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,6 +93,15 @@
 				C9BB23FD21A77DA200CCE007 /* syncronizer.swift */,
 			);
 			path = "certificate-sync";
+			sourceTree = "<group>";
+		};
+		C9BB240421ABE6A000CCE007 /* test-suite */ = {
+			isa = PBXGroup;
+			children = (
+				C9BB240521ABE6A000CCE007 /* test_suite.swift */,
+				C9BB240721ABE6A000CCE007 /* Info.plist */,
+			);
+			path = "test-suite";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -102,6 +124,23 @@
 			productReference = C9BB23E8219CE3C800CCE007 /* certificate-sync */;
 			productType = "com.apple.product-type.tool";
 		};
+		C9BB240221ABE6A000CCE007 /* test-suite */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9BB240A21ABE6A000CCE007 /* Build configuration list for PBXNativeTarget "test-suite" */;
+			buildPhases = (
+				C9BB23FF21ABE6A000CCE007 /* Sources */,
+				C9BB240021ABE6A000CCE007 /* Frameworks */,
+				C9BB240121ABE6A000CCE007 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "test-suite";
+			productName = "test-suite";
+			productReference = C9BB240321ABE6A000CCE007 /* test-suite.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -113,6 +152,9 @@
 				ORGANIZATIONNAME = Dropbox;
 				TargetAttributes = {
 					C9BB23E7219CE3C800CCE007 = {
+						CreatedOnToolsVersion = 10.1;
+					};
+					C9BB240221ABE6A000CCE007 = {
 						CreatedOnToolsVersion = 10.1;
 					};
 				};
@@ -130,9 +172,20 @@
 			projectRoot = "";
 			targets = (
 				C9BB23E7219CE3C800CCE007 /* certificate-sync */,
+				C9BB240221ABE6A000CCE007 /* test-suite */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C9BB240121ABE6A000CCE007 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		C9BB23E4219CE3C800CCE007 /* Sources */ = {
@@ -146,6 +199,14 @@
 				C9BB23F821A73E9400CCE007 /* export_configuration_item.swift in Sources */,
 				C9BB23F621A73E4E00CCE007 /* configuration.swift in Sources */,
 				C9BB23F421A628B200CCE007 /* configuration_item.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9BB23FF21ABE6A000CCE007 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C9BB240621ABE6A000CCE007 /* test_suite.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,6 +348,42 @@
 			};
 			name = Release;
 		};
+		C9BB240821ABE6A000CCE007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = DWVXMLB45Y;
+				INFOPLIST_FILE = "test-suite/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dropbox.corp.test-suite";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Debug;
+		};
+		C9BB240921ABE6A000CCE007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = DWVXMLB45Y;
+				INFOPLIST_FILE = "test-suite/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dropbox.corp.test-suite";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -304,6 +401,15 @@
 			buildConfigurations = (
 				C9BB23F0219CE3C800CCE007 /* Debug */,
 				C9BB23F1219CE3C800CCE007 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9BB240A21ABE6A000CCE007 /* Build configuration list for PBXNativeTarget "test-suite" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9BB240821ABE6A000CCE007 /* Debug */,
+				C9BB240921ABE6A000CCE007 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

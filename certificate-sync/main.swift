@@ -12,6 +12,10 @@ let configurationPath = "/Users/rickmark/Developer/certificate-sync/certificate-
 
 let configuration = Configuration.read(path: configurationPath.toFileURL())
 
+let syncronizer = Syncronizer(configuration: configuration)
+
+syncronizer.run()
+
 //for identityItem in (items! as! [[String: Any]]) {
 //    if identityItem[kSecAttrIssuer as String] as? NSData != arubaIssuer {
 //        continue

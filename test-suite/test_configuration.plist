@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!--
-   test_configuration.plist
-   certificate-sync
-
-   Created by Rick Mark on 11/27/18.
-   Copyright (c) 2018 Dropbox. All rights reserved.
--->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-    <dict>
-    
-    </dict>
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>password</key>
+			<string></string>
+			<key>export</key>
+			<array/>
+			<key>acl</key>
+			<array/>
+			<key>issuer</key>
+			<string>MHcxFzAVBgNVBAMMDmRlbW8ubG9jYWxob3N0MRkwFwYDVQQKDBBDZXJ0aWZpY2F0ZSBTeW5jMRIwEAYDVQQLDAlUZXN0IFVuaXQxCzAJBgNVBAgMAktTMQswCQYDVQQGEwJVUzETMBEGA1UEBwwKU21hbGx2aWxsZQ==</string>
+			<key>keychain</key>
+			<string>demo.keychain</string>
+		</dict>
+	</array>
+</dict>
 </plist>

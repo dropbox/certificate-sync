@@ -35,6 +35,15 @@ class Syncronizer {
                 
                 assert(SecKeychainOpen(item.keychainPath, &keychain) == kOSReturnSuccess)
                 
+                var keychainStatus = SecKeychainStatus()
+                let getStatusResult = SecKeychainGetStatus(keychain!, &keychainStatus)
+                assert(getStatusResult  == kOSReturnSuccess)
+                
+                if item.password != nil {
+                    let result = SecKeychainUnlock(keychain!, UInt32(item.password!.count), item.password!, true)
+                    assert(result == kOSReturnSuccess)
+                }
+                
                 result[item.keychainPath] = keychain!
             }
         }

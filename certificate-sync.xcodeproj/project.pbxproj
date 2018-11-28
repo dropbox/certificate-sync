@@ -17,6 +17,13 @@
 		C9BB240621ABE6A000CCE007 /* test_suite.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB240521ABE6A000CCE007 /* test_suite.swift */; };
 		C9BB240E21AE707200CCE007 /* test_configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = C9BB240D21AE707200CCE007 /* test_configuration.plist */; };
 		C9BB241021AE70BE00CCE007 /* demo.keychain in Resources */ = {isa = PBXBuildFile; fileRef = C9BB240F21AE70BD00CCE007 /* demo.keychain */; };
+		C9BB241421AF2BD800CCE007 /* syncronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FD21A77DA200CCE007 /* syncronizer.swift */; };
+		C9BB241521AF2BDB00CCE007 /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FB21A76F5000CCE007 /* extensions.swift */; };
+		C9BB241621AF2BDE00CCE007 /* acl_configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F921A73E9C00CCE007 /* acl_configuration_item.swift */; };
+		C9BB241721AF2BE200CCE007 /* configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F521A73E4E00CCE007 /* configuration.swift */; };
+		C9BB241821AF2BE500CCE007 /* export_configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F721A73E9400CCE007 /* export_configuration_item.swift */; };
+		C9BB241921AF2BE900CCE007 /* configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F321A628B200CCE007 /* configuration_item.swift */; };
+		C9BB241A21AF2BEE00CCE007 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23EB219CE3C800CCE007 /* main.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -214,7 +221,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C9BB241621AF2BDE00CCE007 /* acl_configuration_item.swift in Sources */,
+				C9BB241721AF2BE200CCE007 /* configuration.swift in Sources */,
+				C9BB241A21AF2BEE00CCE007 /* main.swift in Sources */,
+				C9BB241421AF2BD800CCE007 /* syncronizer.swift in Sources */,
 				C9BB240621ABE6A000CCE007 /* test_suite.swift in Sources */,
+				C9BB241521AF2BDB00CCE007 /* extensions.swift in Sources */,
+				C9BB241921AF2BE900CCE007 /* configuration_item.swift in Sources */,
+				C9BB241821AF2BE500CCE007 /* export_configuration_item.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

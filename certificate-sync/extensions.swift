@@ -23,3 +23,20 @@ extension String {
         return URL(fileURLWithPath: self)
     }
 }
+
+
+extension IteratorProtocol {
+    mutating func toDictionary<T, K : Hashable, V>(functor: (T) -> (key: K, value: V)) -> [ K: V ] {
+        var result = [ K: V]()
+        
+        let element = self.next()
+        
+        while (element != nil) {
+            let mapping = functor(element as! T)
+            
+            result.updateValue(mapping.1, forKey: mapping.0)
+        }
+        
+        return result
+    }
+}

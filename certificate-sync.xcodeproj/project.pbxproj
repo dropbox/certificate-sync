@@ -12,9 +12,11 @@
 		C9BB23F621A73E4E00CCE007 /* configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F521A73E4E00CCE007 /* configuration.swift */; };
 		C9BB23F821A73E9400CCE007 /* export_configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F721A73E9400CCE007 /* export_configuration_item.swift */; };
 		C9BB23FA21A73E9C00CCE007 /* acl_configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F921A73E9C00CCE007 /* acl_configuration_item.swift */; };
-		C9BB23FC21A76F5000CCE007 /* string_extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FB21A76F5000CCE007 /* string_extensions.swift */; };
+		C9BB23FC21A76F5000CCE007 /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FB21A76F5000CCE007 /* extensions.swift */; };
 		C9BB23FE21A77DA200CCE007 /* syncronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FD21A77DA200CCE007 /* syncronizer.swift */; };
 		C9BB240621ABE6A000CCE007 /* test_suite.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB240521ABE6A000CCE007 /* test_suite.swift */; };
+		C9BB240E21AE707200CCE007 /* test_configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = C9BB240D21AE707200CCE007 /* test_configuration.plist */; };
+		C9BB241021AE70BE00CCE007 /* demo.keychain in Resources */ = {isa = PBXBuildFile; fileRef = C9BB240F21AE70BD00CCE007 /* demo.keychain */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,11 +39,13 @@
 		C9BB23F521A73E4E00CCE007 /* configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = configuration.swift; sourceTree = "<group>"; };
 		C9BB23F721A73E9400CCE007 /* export_configuration_item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = export_configuration_item.swift; sourceTree = "<group>"; };
 		C9BB23F921A73E9C00CCE007 /* acl_configuration_item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = acl_configuration_item.swift; sourceTree = "<group>"; };
-		C9BB23FB21A76F5000CCE007 /* string_extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = string_extensions.swift; sourceTree = "<group>"; };
+		C9BB23FB21A76F5000CCE007 /* extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extensions.swift; sourceTree = "<group>"; };
 		C9BB23FD21A77DA200CCE007 /* syncronizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = syncronizer.swift; sourceTree = "<group>"; };
 		C9BB240321ABE6A000CCE007 /* test-suite.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "test-suite.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9BB240521ABE6A000CCE007 /* test_suite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = test_suite.swift; sourceTree = "<group>"; };
 		C9BB240721ABE6A000CCE007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C9BB240D21AE707200CCE007 /* test_configuration.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = test_configuration.plist; sourceTree = "<group>"; };
+		C9BB240F21AE70BD00CCE007 /* demo.keychain */ = {isa = PBXFileReference; lastKnownFileType = file; path = demo.keychain; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,7 +93,7 @@
 				C9BB23F521A73E4E00CCE007 /* configuration.swift */,
 				C9BB23F721A73E9400CCE007 /* export_configuration_item.swift */,
 				C9BB23F921A73E9C00CCE007 /* acl_configuration_item.swift */,
-				C9BB23FB21A76F5000CCE007 /* string_extensions.swift */,
+				C9BB23FB21A76F5000CCE007 /* extensions.swift */,
 				C9BB23FD21A77DA200CCE007 /* syncronizer.swift */,
 			);
 			path = "certificate-sync";
@@ -98,8 +102,10 @@
 		C9BB240421ABE6A000CCE007 /* test-suite */ = {
 			isa = PBXGroup;
 			children = (
+				C9BB240F21AE70BD00CCE007 /* demo.keychain */,
 				C9BB240521ABE6A000CCE007 /* test_suite.swift */,
 				C9BB240721ABE6A000CCE007 /* Info.plist */,
+				C9BB240D21AE707200CCE007 /* test_configuration.plist */,
 			);
 			path = "test-suite";
 			sourceTree = "<group>";
@@ -182,6 +188,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C9BB241021AE70BE00CCE007 /* demo.keychain in Resources */,
+				C9BB240E21AE707200CCE007 /* test_configuration.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -193,7 +201,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C9BB23FE21A77DA200CCE007 /* syncronizer.swift in Sources */,
-				C9BB23FC21A76F5000CCE007 /* string_extensions.swift in Sources */,
+				C9BB23FC21A76F5000CCE007 /* extensions.swift in Sources */,
 				C9BB23FA21A73E9C00CCE007 /* acl_configuration_item.swift in Sources */,
 				C9BB23EC219CE3C800CCE007 /* main.swift in Sources */,
 				C9BB23F821A73E9400CCE007 /* export_configuration_item.swift in Sources */,

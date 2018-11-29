@@ -23,6 +23,8 @@
 		C9BB241821AF2BE500CCE007 /* export_configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F721A73E9400CCE007 /* export_configuration_item.swift */; };
 		C9BB241921AF2BE900CCE007 /* configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F321A628B200CCE007 /* configuration_item.swift */; };
 		C9BB241A21AF2BEE00CCE007 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23EB219CE3C800CCE007 /* main.swift */; };
+		C9BB241D21B072A300CCE007 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9BB241C21B072A300CCE007 /* libcrypto.a */; };
+		C9BB241F21B072BD00CCE007 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9BB241E21B072BD00CCE007 /* libssl.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -40,7 +42,6 @@
 /* Begin PBXFileReference section */
 		C9BB23E8219CE3C800CCE007 /* certificate-sync */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "certificate-sync"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9BB23EB219CE3C800CCE007 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		C9BB23F221A6270200CCE007 /* configuration.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = configuration.plist; sourceTree = "<group>"; };
 		C9BB23F321A628B200CCE007 /* configuration_item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = configuration_item.swift; sourceTree = "<group>"; };
 		C9BB23F521A73E4E00CCE007 /* configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = configuration.swift; sourceTree = "<group>"; };
 		C9BB23F721A73E9400CCE007 /* export_configuration_item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = export_configuration_item.swift; sourceTree = "<group>"; };
@@ -51,6 +52,9 @@
 		C9BB240521ABE6A000CCE007 /* test_suite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = test_suite.swift; sourceTree = "<group>"; };
 		C9BB240721ABE6A000CCE007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C9BB240D21AE707200CCE007 /* test_configuration.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = test_configuration.plist; sourceTree = "<group>"; };
+		C9BB241C21B072A300CCE007 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = ../../../../../usr/local/Cellar/openssl/1.0.2p/lib/libcrypto.a; sourceTree = "<group>"; };
+		C9BB241E21B072BD00CCE007 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = ../../../../../usr/local/Cellar/openssl/1.0.2p/lib/libssl.a; sourceTree = "<group>"; };
+		C9BB242021B0737A00CCE007 /* bridging-header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "bridging-header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +69,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C9BB241F21B072BD00CCE007 /* libssl.a in Frameworks */,
+				C9BB241D21B072A300CCE007 /* libcrypto.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +83,7 @@
 				C9BB23EA219CE3C800CCE007 /* certificate-sync */,
 				C9BB240421ABE6A000CCE007 /* test-suite */,
 				C9BB23E9219CE3C800CCE007 /* Products */,
+				C9BB241B21B072A300CCE007 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -93,7 +100,6 @@
 			isa = PBXGroup;
 			children = (
 				C9BB23EB219CE3C800CCE007 /* main.swift */,
-				C9BB23F221A6270200CCE007 /* configuration.plist */,
 				C9BB23F321A628B200CCE007 /* configuration_item.swift */,
 				C9BB23F521A73E4E00CCE007 /* configuration.swift */,
 				C9BB23F721A73E9400CCE007 /* export_configuration_item.swift */,
@@ -110,8 +116,18 @@
 				C9BB240521ABE6A000CCE007 /* test_suite.swift */,
 				C9BB240721ABE6A000CCE007 /* Info.plist */,
 				C9BB240D21AE707200CCE007 /* test_configuration.plist */,
+				C9BB242021B0737A00CCE007 /* bridging-header.h */,
 			);
 			path = "test-suite";
+			sourceTree = "<group>";
+		};
+		C9BB241B21B072A300CCE007 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C9BB241E21B072BD00CCE007 /* libssl.a */,
+				C9BB241C21B072A300CCE007 /* libcrypto.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -372,14 +388,20 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = DWVXMLB45Y;
+				HEADER_SEARCH_PATHS = /usr/local/opt/openssl/include;
 				INFOPLIST_FILE = "test-suite/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/openssl/1.0.2p/lib,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.dropbox.corp.test-suite";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "test-suite/bridging-header.h";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
@@ -390,14 +412,20 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = DWVXMLB45Y;
+				HEADER_SEARCH_PATHS = /usr/local/opt/openssl/include;
 				INFOPLIST_FILE = "test-suite/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/Cellar/openssl/1.0.2p/lib,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.dropbox.corp.test-suite";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "test-suite/bridging-header.h";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Release;

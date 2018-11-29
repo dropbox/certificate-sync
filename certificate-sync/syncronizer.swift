@@ -33,16 +33,22 @@ class Syncronizer {
             if result.keys.contains(item.keychainPath) == false {
                 var keychain: SecKeychain?
                 
-                assert(SecKeychainOpen(item.keychainPath, &keychain) == kOSReturnSuccess)
+                assert(SecKeychainOpen(item.keychainPath.toUnixPath(), &keychain) == kOSReturnSuccess)
                 
                 var keychainStatus = SecKeychainStatus()
-                let getStatusResult = SecKeychainGetStatus(keychain!, &keychainStatus)
-                assert(getStatusResult  == kOSReturnSuccess)
+                assert(SecKeychainGetStatus(keychain!, &keychainStatus) == kOSReturnSuccess)
                 
-                if item.password != nil {
-                    let result = SecKeychainUnlock(keychain!, UInt32(item.password!.count), item.password!, true)
-                    assert(result == kOSReturnSuccess)
+                if ((keychainStatus & kSecUnlockStateStatus) == 0) {
+                    if item.password != nil {
+                        assert(SecKeychainUnlock(keychain!, UInt32(item.password!.count), item.password!, true) == kOSReturnSuccess)
+                    }
+                    else {
+                        assert(SecKeychainUnlock(keychain!, 0, "", false) == kOSReturnSuccess)
+                    }
                 }
+                
+                assert(SecKeychainGetStatus(keychain!, &keychainStatus) == kOSReturnSuccess)
+                assert((keychainStatus & kSecUnlockStateStatus > 0) && (keychainStatus & kSecReadPermStatus > 0) && (keychainStatus & kSecWritePermStatus > 0))
                 
                 result[item.keychainPath] = keychain!
             }
@@ -148,7 +154,11 @@ class Syncronizer {
         assert(access != nil)
         
         var aclEntriesArray: CFArray?
-        assert(SecAccessCopyACLList(access!, &aclEntriesArray) == kOSReturnSuccess)
+        var userId: uid_t = 0
+        var groupId: gid_t = 0
+        var ownerAccessType: SecAccessOwnerType = 0
+        
+        assert(SecAccessCopyOwnerAndACL(access!, &userId, &groupId, &ownerAccessType, &aclEntriesArray) == kOSReturnSuccess)
         
         return aclEntriesArray as! [ SecACL ]
     }
@@ -168,38 +178,58 @@ class Syncronizer {
             var promptSelector = SecKeychainPromptSelector.init(rawValue: 0)
             
             SecACLCopyContents(aclEntry, &applicationListArray, &description, &promptSelector)
+            var authorizationArray = SecACLCopyAuthorizations(aclEntry) as! [ CFString ]
             
             if applicationListArray == nil {
-                continue
+                applicationListArray = NSArray()
             }
             
             var applicationList = applicationListArray as! [ SecTrustedApplication ]
             
-            var authorizationArray = SecACLCopyAuthorizations(aclEntry) as! [ CFString ]
-            
-            if authorizationArray.contains(kSecACLAuthorizationChangeACL) {
-                if authorizationArray.contains(kSecACLAuthorizationExportClear) == false {
-                    authorizationArray.append(kSecACLAuthorizationExportClear)
-                    updateACL = true
-                }
-                if authorizationArray.contains(kSecACLAuthorizationExportWrapped) == false {
-                    authorizationArray.append(kSecACLAuthorizationExportWrapped)
-                    updateACL = true
-                }
-                
-                if updateACL {
-                    assert(SecACLUpdateAuthorizations(aclEntry, authorizationArray as CFArray) == kOSReturnSuccess)
-                }
-            }
-            
-            if applicationList.contains(selfTrustedApplication) == false {
+            if authorizationArray.contains(kSecACLAuthorizationChangeACL)
+                && applicationList.contains(selfTrustedApplication) == false  {
+
                 applicationList.append(selfTrustedApplication)
-                assert(SecACLSetContents(aclEntry, applicationList as CFArray, description!, promptSelector) == kOSReturnSuccess)
+
+                let authorizationUpdate = SecACLUpdateAuthorizations(aclEntry, applicationList as CFArray)
+                assert(authorizationUpdate == kOSReturnSuccess)
+                
+                let setContents = SecACLSetContents(aclEntry, applicationList as CFArray, description!, promptSelector)
+                assert(setContents == kOSReturnSuccess)
+                
+                continue
             }
             
-            if updateACL {
-                SecKeychainItemSetAccess(identity as! SecKeychainItem, access!)
-            }
+
+            
+            
+            
+            
+//
+//            if applicationList.contains(selfTrustedApplication) {
+//                applicationList.append(selfTrustedApplication)
+//                assert(SecACLSetContents(aclEntry, applicationList as CFArray, description!, promptSelector) == kOSReturnSuccess)
+//            }
+//
+//            if updateACL {
+//                SecKeychainItemSetAccess(identity as! SecKeychainItem, access!)
+//            }
+//
+//
+//
+//            if authorizationArray.contains(kSecACLAuthorizationExportClear) == false {
+//                authorizationArray.append(kSecACLAuthorizationExportClear)
+//                updateACL = true
+//            }
+//            if authorizationArray.contains(kSecACLAuthorizationExportWrapped) == false {
+//                authorizationArray.append(kSecACLAuthorizationExportWrapped)
+//                updateACL = true
+//            }
+//
+//            if updateACL {
+//                let result = SecACLUpdateAuthorizations(aclEntry, authorizationArray as CFArray)
+//                assert(result == kOSReturnSuccess)
+//            }
         }
     }
 }

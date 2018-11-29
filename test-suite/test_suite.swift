@@ -22,13 +22,14 @@ class test_suite: XCTestCase {
     }
     
     private func getKeychainCopy() -> URL {
-        let keychainItem = URL(fileURLWithPath: Bundle(for: type(of: self)).path(forResource: "demo", ofType: "keychain")!)
-        
         let tempDirectoryURL = NSURL.fileURL(withPath: NSTemporaryDirectory(), isDirectory: true)
         
-        let tempKeychainFile = tempDirectoryURL.appendingPathComponent("demo.keychain")
+        let tempKeychainFile = tempDirectoryURL.appendingPathComponent("\(UUID().uuidString)-demo.keychain")
+
+        var keychain: SecKeychain?
+        let createResult = SecKeychainCreate(tempKeychainFile.absoluteString.toUnixPath(), 0, "", false, nil, &keychain)
         
-        try? FileManager.default.copyItem(at: keychainItem, to: tempKeychainFile)
+        
         
         return tempKeychainFile
     }
@@ -36,7 +37,7 @@ class test_suite: XCTestCase {
     private func modifyConfigurationForDemoKeychain(configuration: Configuration, demoKeychainPath: URL) -> Configuration {
         let mapping = configuration.items.map { (item) -> ConfigurationItem in
             if item.keychainPath == "demo.keychain" {
-                return ConfigurationItem(issuer: item.issuer, exports: item.exports, acls: item.acls, keychainPath: demoKeychainPath.absoluteString, password: item.password!)
+                return ConfigurationItem(issuer: item.issuer, exports: item.exports, acls: item.acls, keychainPath: demoKeychainPath.absoluteString, password: item.password)
             }
             else {
                 return item

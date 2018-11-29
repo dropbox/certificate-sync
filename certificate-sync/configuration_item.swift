@@ -17,7 +17,7 @@ class ConfigurationItem {
     
     /// You should really never use the password form, this is for unit testing only
     /// Will attempt to make debug pramgma later TODO
-    init(issuer: Data, exports: [ExportConfigurationItem], acls: [ACLConfigurationItem], keychainPath: String, password: String) {
+    init(issuer: Data, exports: [ExportConfigurationItem], acls: [ACLConfigurationItem], keychainPath: String, password: String?) {
         self.issuer = issuer
         self.exports = exports
         self.acls = acls
@@ -29,7 +29,7 @@ class ConfigurationItem {
         let issuer = Data(base64Encoded: configuration["issuer"] as! String)!
         var keychainPath: String!
         let keychainValue = configuration["keychain"] as! String
-        let password = configuration["password"] as! String
+        let password = configuration["password"] as? String
         
         switch keychainValue {
         case "system":

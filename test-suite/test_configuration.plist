@@ -5,8 +5,6 @@
 	<key>items</key>
 	<array>
 		<dict>
-			<key>password</key>
-			<string></string>
 			<key>export</key>
 			<array/>
 			<key>acl</key>

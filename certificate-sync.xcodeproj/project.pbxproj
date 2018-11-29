@@ -16,7 +16,6 @@
 		C9BB23FE21A77DA200CCE007 /* syncronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FD21A77DA200CCE007 /* syncronizer.swift */; };
 		C9BB240621ABE6A000CCE007 /* test_suite.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB240521ABE6A000CCE007 /* test_suite.swift */; };
 		C9BB240E21AE707200CCE007 /* test_configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = C9BB240D21AE707200CCE007 /* test_configuration.plist */; };
-		C9BB241021AE70BE00CCE007 /* demo.keychain in Resources */ = {isa = PBXBuildFile; fileRef = C9BB240F21AE70BD00CCE007 /* demo.keychain */; };
 		C9BB241421AF2BD800CCE007 /* syncronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FD21A77DA200CCE007 /* syncronizer.swift */; };
 		C9BB241521AF2BDB00CCE007 /* extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23FB21A76F5000CCE007 /* extensions.swift */; };
 		C9BB241621AF2BDE00CCE007 /* acl_configuration_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23F921A73E9C00CCE007 /* acl_configuration_item.swift */; };
@@ -52,7 +51,6 @@
 		C9BB240521ABE6A000CCE007 /* test_suite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = test_suite.swift; sourceTree = "<group>"; };
 		C9BB240721ABE6A000CCE007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C9BB240D21AE707200CCE007 /* test_configuration.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = test_configuration.plist; sourceTree = "<group>"; };
-		C9BB240F21AE70BD00CCE007 /* demo.keychain */ = {isa = PBXFileReference; lastKnownFileType = file; path = demo.keychain; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,7 +107,6 @@
 		C9BB240421ABE6A000CCE007 /* test-suite */ = {
 			isa = PBXGroup;
 			children = (
-				C9BB240F21AE70BD00CCE007 /* demo.keychain */,
 				C9BB240521ABE6A000CCE007 /* test_suite.swift */,
 				C9BB240721ABE6A000CCE007 /* Info.plist */,
 				C9BB240D21AE707200CCE007 /* test_configuration.plist */,
@@ -195,7 +192,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C9BB241021AE70BE00CCE007 /* demo.keychain in Resources */,
 				C9BB240E21AE707200CCE007 /* test_configuration.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

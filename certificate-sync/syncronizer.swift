@@ -57,7 +57,7 @@ class Syncronizer {
         return result
     }
     
-    func mapIdentities() -> [ ( ConfigurationItem, SecIdentity ) ] {
+    func mapIdentities() -> [ ( configuration: ConfigurationItem, identity: SecIdentity ) ] {
         var results = [ (ConfigurationItem, SecIdentity ) ]()
         
         for (path, keychain) in getKeychains() {
@@ -66,7 +66,8 @@ class Syncronizer {
                          kSecReturnRef: true,
                          kSecMatchLimit: kSecMatchLimitAll,
                          kSecReturnAttributes: true,
-                         kSecUseKeychain: keychain] as CFDictionary
+                         kSecMatchSearchList: [ keychain ]
+                ] as CFDictionary
             
             var items: CFTypeRef?
             
@@ -154,11 +155,8 @@ class Syncronizer {
         assert(access != nil)
         
         var aclEntriesArray: CFArray?
-        var userId: uid_t = 0
-        var groupId: gid_t = 0
-        var ownerAccessType: SecAccessOwnerType = 0
         
-        assert(SecAccessCopyOwnerAndACL(access!, &userId, &groupId, &ownerAccessType, &aclEntriesArray) == kOSReturnSuccess)
+        assert(SecAccessCopyACLList(access!, &aclEntriesArray) == kOSReturnSuccess)
         
         return aclEntriesArray as! [ SecACL ]
     }
@@ -230,6 +228,35 @@ class Syncronizer {
 //                let result = SecACLUpdateAuthorizations(aclEntry, authorizationArray as CFArray)
 //                assert(result == kOSReturnSuccess)
 //            }
+        }
+    }
+    
+    func exportKeychainItems(items: [ ( configuration: ConfigurationItem, identity: SecIdentity ) ]) {
+        for item in items {
+            for export in item.configuration.exports {
+                var exportParameters = SecItemImportExportKeyParameters.init()
+                let exportFlags = export.pemEncode ? SecItemImportExportFlags.pemArmour : SecItemImportExportFlags.init(rawValue: 0)
+                
+                var exportData: CFData?
+                
+                if export.format == .formatPEMSequence {
+                    var privateKey: SecKey?
+                    
+                    assert(SecIdentityCopyPrivateKey(item.identity, &privateKey) == kOSReturnSuccess)
+                    let result = SecItemExport(privateKey!, export.format, exportFlags, &exportParameters, &exportData)
+                    assert(result == kOSReturnSuccess)
+                }
+                if export.format == .formatX509Cert {
+                    var certificate: SecCertificate?
+                    
+                    assert(SecIdentityCopyCertificate(item.identity, &certificate) == kOSReturnSuccess)
+                    let result = SecItemExport(certificate!, export.format, exportFlags, &exportParameters, &exportData)
+                    assert(result == kOSReturnSuccess)
+                }
+                
+                let exportedData = exportData as NSData?
+                exportedData!.write(to: export.path, atomically: true)
+            }
         }
     }
 }

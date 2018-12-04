@@ -6,7 +6,20 @@
 	<array>
 		<dict>
 			<key>export</key>
-			<array/>
+			<array>
+				<dict>
+					<key>format</key>
+					<string>pem-cer</string>
+					<key>path</key>
+					<string>export-certificate-example.cer</string>
+				</dict>
+				<dict>
+					<key>format</key>
+					<string>pem</string>
+					<key>path</key>
+					<string>export-pem-example.pem</string>
+				</dict>
+			</array>
 			<key>acl</key>
 			<array/>
 			<key>issuer</key>

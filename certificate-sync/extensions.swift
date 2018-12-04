@@ -22,6 +22,10 @@ extension String {
     func toFileURL() -> URL {
         return URL(fileURLWithPath: self)
     }
+    
+    func standardizePath() -> String {
+        return (self as NSString).standardizingPath
+    }
 }
 
 

@@ -9,40 +9,40 @@
 import Foundation
 
 class ExportConfigurationItem {
-    enum Format {
-        case PEM
-        case CER
-    }
     
-    let format: Format
+    let format: SecExternalFormat
     let path: URL
-    let owner: String
+    let owner: String?
     let mode: mode_t
+    let pemEncode: Bool
     
-    init(format: Format, path: URL, owner: String, mode: mode_t) {
+    init(format: SecExternalFormat, path: URL, owner: String?, mode: mode_t, pemArmor: Bool) {
         self.format = format
         self.path = path
         self.owner = owner
         self.mode = mode
+        self.pemEncode = pemArmor
     }
     
     static func parse(configuration: [ String : Any ]) -> ExportConfigurationItem {
-        var format: Format
+        var format: SecExternalFormat
+        var pemArmor = false
         switch configuration["format"] as! String {
         case "pem":
-            format = Format.PEM
-        case "cer":
-            format = Format.CER
+            format = SecExternalFormat.formatPEMSequence
+        case "pem-cer":
+            format = SecExternalFormat.formatX509Cert
+            pemArmor = true
         default:
-            format = Format.CER
+            format = SecExternalFormat.formatX509Cert
         }
         
-        let mode = (configuration["mode"] ?? 600) as! mode_t
+        let mode = (configuration["mode"] ?? UInt16(600)) as! mode_t
         
-        let owner = configuration["owner"] as! String
+        let owner = configuration["owner"] as? String
         
         let path = (configuration["path"] as! String).toFileURL()
         
-        return ExportConfigurationItem(format: format, path: path, owner: owner, mode: mode)
+        return ExportConfigurationItem(format: format, path: path, owner: owner, mode: mode, pemArmor: pemArmor)
     }
 }

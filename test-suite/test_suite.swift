@@ -12,6 +12,7 @@ import XCTest
 class test_suite: XCTestCase {
     
     var testConfiguration: URL!
+    let tag = "com.dropbox.entsec.certificate-sync.tests".data(using: .utf8)!
 
     override func setUp() {
         let selfBundle = Bundle(for: type(of: self))
@@ -22,7 +23,7 @@ class test_suite: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
     
-    private func getKeychainCopy() -> URL {
+    private func getKeychainCopy() -> (URL, SecKeychain) {
         let tempDirectoryURL = NSURL.fileURL(withPath: NSTemporaryDirectory(), isDirectory: true)
         
         let tempKeychainFile = tempDirectoryURL.appendingPathComponent("\(UUID().uuidString)-demo.keychain")
@@ -32,8 +33,6 @@ class test_suite: XCTestCase {
         
         var privateKey: SecKey!
         var publicKey: SecKey!
-        
-        let tag = "com.dropbox.entsec.certificate-sync.tests".data(using: .utf8)!
         
         let generationAttributes: [String: Any] = [
             kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
@@ -138,13 +137,22 @@ class test_suite: XCTestCase {
         let certificateKeychainItem = (certificateImportResults as! [ SecCertificate ]).first!
         assert(SecIdentityCreateWithCertificate(keychain!, certificateKeychainItem, &identity) == kOSReturnSuccess)
         
-        return tempKeychainFile
+        return (tempKeychainFile, keychain!)
     }
     
-    private func modifyConfigurationForDemoKeychain(configuration: Configuration, demoKeychainPath: URL) -> Configuration {
+    private func modifyConfigurationForDemoKeychain(configuration: Configuration, demoKeychainPath: URL, issuer: Data) -> Configuration {
+        let tempDirectoryURL = NSURL.fileURL(withPath: NSTemporaryDirectory(), isDirectory: true)
+        
         let mapping = configuration.items.map { (item) -> ConfigurationItem in
             if item.keychainPath == "demo.keychain" {
-                return ConfigurationItem(issuer: item.issuer, exports: item.exports, acls: item.acls, keychainPath: demoKeychainPath.absoluteString, password: item.password)
+                
+                let exports = item.exports.map({ (export) -> ExportConfigurationItem in
+                    let newPath = tempDirectoryURL.appendingPathComponent(export.path.absoluteString)
+                    
+                    return ExportConfigurationItem(format: export.format, path: newPath, owner: export.owner, mode: export.mode, pemArmor: export.pemEncode)
+                })
+                
+                return ConfigurationItem(issuer: issuer, exports: exports, acls: item.acls, keychainPath: demoKeychainPath.absoluteString, password: item.password)
             }
             else {
                 return item
@@ -153,15 +161,33 @@ class test_suite: XCTestCase {
         
         return Configuration(items: mapping)
     }
+    
+    private func getCertificateIssuer(keychain: SecKeychain) -> Data {
+        let certificateQuery: [String : Any] = [
+            kSecClass as String: kSecClassIdentity,
+            kSecMatchSearchList as String: [ keychain ],
+            kSecMatchLimit as String: kSecMatchLimitOne,
+            kSecReturnAttributes as String: true
+        ]
+        
+        var resultItem: CFTypeRef?
+        assert(SecItemCopyMatching(certificateQuery as CFDictionary, &resultItem) == kOSReturnSuccess)
+        assert(resultItem != nil)
+        
+        let resultDictionaryArray = resultItem as! [ String: Any ]
+        
+        return resultDictionaryArray[kSecAttrIssuer as String] as! Data
+    }
 
     func testLoadConfiguration() {
         let _ = Configuration.read(path: testConfiguration)
     }
 
     func testMapIdentities() {
-        let keychainCopy = getKeychainCopy()
+        let (keychainCopy, keychain) = getKeychainCopy()
         
-        let configuration = modifyConfigurationForDemoKeychain(configuration: Configuration.read(path: testConfiguration), demoKeychainPath: keychainCopy)
+        let issuer = getCertificateIssuer(keychain: keychain)
+        let configuration = modifyConfigurationForDemoKeychain(configuration: Configuration.read(path: testConfiguration), demoKeychainPath: keychainCopy, issuer: issuer)
         
         let syncronizer = Syncronizer(configuration: configuration)
         
@@ -170,10 +196,27 @@ class test_suite: XCTestCase {
         assert(results.count == 1)
     }
     
-    func testMapSetOwnerACL() {
-        let keychainCopy = getKeychainCopy()
+    func testKeychainPathValid() {
+        let (keychainCopy, keychain) = getKeychainCopy()
         
-        let configuration = modifyConfigurationForDemoKeychain(configuration: Configuration.read(path: testConfiguration), demoKeychainPath: keychainCopy)
+        var pathLength: UInt32 = 0
+        var pathBuffer = UnsafeMutablePointer<Int8>.allocate(capacity: 0)
+        
+        assert(SecKeychainGetPath(keychain, &pathLength, pathBuffer) == errSecBufferTooSmall)
+        pathLength += 1
+        pathBuffer = UnsafeMutablePointer<Int8>.allocate(capacity: Int(pathLength))
+        assert(SecKeychainGetPath(keychain, &pathLength, pathBuffer) == kOSReturnSuccess)
+        
+        let path = String(cString: pathBuffer)
+        
+        assert(path.standardizePath() == keychainCopy.absoluteString.toUnixPath().standardizePath())
+    }
+    
+    func testMapSetOwnerACL() {
+        let (keychainCopy, keychain) = getKeychainCopy()
+        let issuer = getCertificateIssuer(keychain: keychain)
+        
+        let configuration = modifyConfigurationForDemoKeychain(configuration: Configuration.read(path: testConfiguration), demoKeychainPath: keychainCopy, issuer: issuer)
         
         let syncronizer = Syncronizer(configuration: configuration)
         
@@ -184,4 +227,18 @@ class test_suite: XCTestCase {
         syncronizer.ensureSelfInOwnerACL(identity: (results.first?.1)!)
     }
 
+    func testExportItems() {
+        let (keychainCopy, keychain) = getKeychainCopy()
+        let issuer = getCertificateIssuer(keychain: keychain)
+        
+        let configuration = modifyConfigurationForDemoKeychain(configuration: Configuration.read(path: testConfiguration), demoKeychainPath: keychainCopy, issuer: issuer)
+        
+        let syncronizer = Syncronizer(configuration: configuration)
+        
+        let results = syncronizer.mapIdentities()
+        
+        assert(results.count == 1)
+        
+        syncronizer.exportKeychainItems(items: results)
+    }
 }

@@ -45,7 +45,7 @@ class ACLConfigurationItem {
         }
     }
     
-    func trustedAppliction() -> SecTrustedApplication {
+    lazy var trustedAppliction: SecTrustedApplication = {
         var trustedApplication: SecTrustedApplication?
         
         let createResult = SecTrustedApplicationCreateFromPath(self.path, &trustedApplication)
@@ -54,5 +54,5 @@ class ACLConfigurationItem {
         assert(trustedApplication != nil)
         
         return trustedApplication!
-    }
+    }()
 }

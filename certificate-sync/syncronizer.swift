@@ -9,6 +9,13 @@
 import Foundation
 
 class Syncronizer {
+    let privateKeyACLDescription = "com.dropbox.certificate-sync.acl"
+    
+    let requiredAuthorization = [ kSecACLAuthorizationSign,
+                                  kSecACLAuthorizationMAC,
+                                  kSecACLAuthorizationDerive,
+                                  kSecACLAuthorizationDecrypt ]
+    
     let configuration: Configuration
     
     init(configuration: Configuration) {
@@ -102,132 +109,141 @@ class Syncronizer {
         
         return trustedApplication!
     }
+
     
-//    func ensureAppsInACL(identity: SecIdentity, aclEntries: [ ACLConfigurationItem ]) {
-//        var aclEntryList = getSecAccessForIdentity(identity: identity)
-//
-//        let appsToAdd = aclEntries.reduce([ Data, SecTrustedApplication ]() { (results, item) -> [ Data : SecTrustedApplication ] in
-//            var trustedApplication: SecTrustedApplication?
-//            var applicationData: CFData?
-//
-//            assert(SecTrustedApplicationCreateFromPath(item.path, &trustedApplication) == kOSReturnSuccess)
-//
-//            assert(SecTrustedApplicationCopyData(trustedApplication!, &applicationData) == kOSReturnSuccess)
-//
-//            results[(applicationData! as Data)] = trustedApplication!
-//        }
-//
-//        var applicationIndex = aclEntryList.flatMap { (acl) -> [ ( SecTrustedApplication, Data ) ] in
-//            var applicationListArray: CFArray?
-//            var description: CFString?
-//            var promptSelector = SecKeychainPromptSelector.init(rawValue: 0)
-//
-//            SecACLCopyContents(acl, &applicationListArray, &description, &promptSelector)
-//
-//            return (applicationListArray as! [ SecTrustedApplication ]).map({ (trustedApplication) -> (SecTrustedApplication, Data) in
-//                var data: CFData?
-//
-//                SecTrustedApplicationCopyData(trustedApplication, &data)
-//
-//                return (trustedApplication, data! as Data)
-//            })
-//        }
-//
-//        for entry in applicationIndex {
-//            let application = applicationIndex[entry.1]
-//
-//            if application == nil {
-//
-//
-//
-//            }
-//        }
-//    }
-    
-    private func getSecAccessForIdentity(identity: SecIdentity, access: inout SecAccess?) -> [ SecACL ] {
+    func ensureSelfInOwnerACL(identity: SecIdentity) {
+        var access: SecAccess?
         var privateKey: SecKey?
-        SecIdentityCopyPrivateKey(identity, &privateKey)
         
+        assert(SecIdentityCopyPrivateKey(identity, &privateKey) == kOSReturnSuccess)
         assert(privateKey != nil)
+        
         let privateKeyItem = (privateKey as Any) as! SecKeychainItem
         
         assert(SecKeychainItemCopyAccess(privateKeyItem, &access) == kOSReturnSuccess)
         assert(access != nil)
-        
-        var aclEntriesArray: CFArray?
-        
-        assert(SecAccessCopyACLList(access!, &aclEntriesArray) == kOSReturnSuccess)
-        
-        return aclEntriesArray as! [ SecACL ]
-    }
-    
-    func ensureSelfInOwnerACL(identity: SecIdentity) {
-        var access: SecAccess?
-        
-        let aclEntriesArray = getSecAccessForIdentity(identity: identity, access: &access)
+
         
         let selfTrustedApplication = trustedApplicationForSelf()
         
-        var updateACL = false
+        let aclResults = SecAccessCopyMatchingACLList(access!, kSecACLAuthorizationChangeACL)
         
-        for aclEntry in aclEntriesArray {
-            var applicationListArray: CFArray?
+        let acls = aclResults as! [ SecACL ]
+        
+        for acl in acls {
+            var applicationList: CFArray?
             var description: CFString?
-            var promptSelector = SecKeychainPromptSelector.init(rawValue: 0)
+            var promptSelector = SecKeychainPromptSelector()
             
-            SecACLCopyContents(aclEntry, &applicationListArray, &description, &promptSelector)
-            var authorizationArray = SecACLCopyAuthorizations(aclEntry) as! [ CFString ]
+            assert(SecACLCopyContents(acl, &applicationList, &description, &promptSelector) == kOSReturnSuccess)
             
-            if applicationListArray == nil {
-                applicationListArray = NSArray()
+            if description == nil {
+                description = "" as CFString
+            }
+
+            applicationList = updateApplicationList(existing: applicationList, applications: [ selfTrustedApplication ])
+            
+            assert(SecACLSetContents(acl, applicationList! as CFArray, description!, promptSelector) == kOSReturnSuccess)
+
+            assert(SecKeychainItemSetAccess(privateKeyItem, access!) == kOSReturnSuccess)
+        }
+    }
+    
+    private func updateApplicationList(existing: CFArray?, applications: [ SecTrustedApplication ]) -> CFArray {
+        var applicationListArray = existing == nil ? [ SecTrustedApplication ]() : existing as! [ SecTrustedApplication ]
+        
+        let existingApplicationData = applicationListArray.map { (item) -> Data in
+            var data: CFData?
+            
+            assert(SecTrustedApplicationCopyData(item, &data) == kOSReturnSuccess)
+            
+            return data! as Data
+        }
+        
+        for applicationToAdd in applications {
+            var data: CFData?
+            
+            assert(SecTrustedApplicationCopyData(applicationToAdd, &data) == kOSReturnSuccess)
+            
+            let castData = data! as Data
+            
+            if existingApplicationData.contains(castData) == false {
+                applicationListArray.append(applicationToAdd)
+            }
+        }
+        
+        return applicationListArray as CFArray
+    }
+    
+    func ensureACLContainsApps(items: [ ( configuration: ConfigurationItem, identity: SecIdentity ) ]) {
+        for item in items {
+            var privateKey: SecKey?
+            var access: SecAccess?
+            var aclListArray: CFArray?
+
+            assert(SecIdentityCopyPrivateKey(item.identity, &privateKey) == kOSReturnSuccess)
+            assert(privateKey != nil)
+            
+            let privateKeyItem = (privateKey as Any) as! SecKeychainItem
+            
+            assert(SecKeychainItemCopyAccess(privateKeyItem, &access) == kOSReturnSuccess)
+            assert(access != nil)
+            
+            assert(SecAccessCopyACLList(access!, &aclListArray) == kOSReturnSuccess)
+            assert(aclListArray != nil)
+            let acls = aclListArray as! [ SecACL ]
+            
+            var foundACL = false
+            
+            for acl in acls {
+                var applicationListArray: CFArray?
+                var descriptionString: CFString?
+                var promptSelector = SecKeychainPromptSelector()
+                
+                assert(SecACLCopyContents(acl, &applicationListArray, &descriptionString, &promptSelector) == kOSReturnSuccess)
+                
+                let description = descriptionString as String?
+                
+                if description != privateKeyACLDescription { continue }
+                
+                foundACL = true
+                
+                let applications = item.configuration.acls.map { (acl) -> SecTrustedApplication in
+                    return acl.trustedAppliction
+                }
+
+                applicationListArray = updateApplicationList(existing: applicationListArray, applications: applications)
+
+                var authorizations = SecACLCopyAuthorizations(acl) as! [ CFString ]
+                
+                for authorization in requiredAuthorization {
+                    if authorizations.contains(authorization) == false {
+                        authorizations.append(authorization)
+                    }
+                }
+                
+                assert(SecACLUpdateAuthorizations(acl, authorizations as CFArray) == kOSReturnSuccess)
+                
+                assert(SecACLSetContents(acl, applicationListArray, description! as CFString, promptSelector) == kOSReturnSuccess)
             }
             
-            var applicationList = applicationListArray as! [ SecTrustedApplication ]
-            
-            if authorizationArray.contains(kSecACLAuthorizationChangeACL)
-                && applicationList.contains(selfTrustedApplication) == false  {
-
-                applicationList.append(selfTrustedApplication)
-
-                let authorizationUpdate = SecACLUpdateAuthorizations(aclEntry, applicationList as CFArray)
-                assert(authorizationUpdate == kOSReturnSuccess)
+            if foundACL == false {
+                var acl: SecACL?
+                let promptSelector = SecKeychainPromptSelector()
                 
-                let setContents = SecACLSetContents(aclEntry, applicationList as CFArray, description!, promptSelector)
-                assert(setContents == kOSReturnSuccess)
+                let applications = item.configuration.acls.map { (item) -> SecTrustedApplication in
+                    item.trustedAppliction
+                } as CFArray
                 
-                continue
+                assert(SecACLCreateWithSimpleContents(access!, applications, privateKeyACLDescription as CFString, promptSelector, &acl) == kOSReturnSuccess)
+                assert(acl != nil)
+                
+                let authorizations = requiredAuthorization as CFArray
+                
+                assert(SecACLUpdateAuthorizations(acl!, authorizations) == kOSReturnSuccess)
             }
             
-
-            
-            
-            
-            
-//
-//            if applicationList.contains(selfTrustedApplication) {
-//                applicationList.append(selfTrustedApplication)
-//                assert(SecACLSetContents(aclEntry, applicationList as CFArray, description!, promptSelector) == kOSReturnSuccess)
-//            }
-//
-//            if updateACL {
-//                SecKeychainItemSetAccess(identity as! SecKeychainItem, access!)
-//            }
-//
-//
-//
-//            if authorizationArray.contains(kSecACLAuthorizationExportClear) == false {
-//                authorizationArray.append(kSecACLAuthorizationExportClear)
-//                updateACL = true
-//            }
-//            if authorizationArray.contains(kSecACLAuthorizationExportWrapped) == false {
-//                authorizationArray.append(kSecACLAuthorizationExportWrapped)
-//                updateACL = true
-//            }
-//
-//            if updateACL {
-//                let result = SecACLUpdateAuthorizations(aclEntry, authorizationArray as CFArray)
-//                assert(result == kOSReturnSuccess)
-//            }
+            assert(SecKeychainItemSetAccess(privateKeyItem, access!) == kOSReturnSuccess)
         }
     }
     
@@ -235,9 +251,14 @@ class Syncronizer {
         for item in items {
             for export in item.configuration.exports {
                 var exportParameters = SecItemImportExportKeyParameters.init()
-                let exportFlags = export.pemEncode ? SecItemImportExportFlags.pemArmour : SecItemImportExportFlags.init(rawValue: 0)
+                let exportFlags = export.pemEncode ? SecItemImportExportFlags.pemArmour : SecItemImportExportFlags()
                 
                 var exportData: CFData?
+                
+                if export.password != nil {
+                    let passwordData = Unmanaged<CFTypeRef>.passRetained(export.password! as CFTypeRef)
+                    exportParameters.passphrase = passwordData
+                }
                 
                 if export.format == .formatPEMSequence {
                     var privateKey: SecKey?
@@ -256,6 +277,9 @@ class Syncronizer {
                 
                 let exportedData = exportData as NSData?
                 exportedData!.write(to: export.path, atomically: true)
+                
+                // TODO: Set owner
+                // TODO: Set mode
             }
         }
     }

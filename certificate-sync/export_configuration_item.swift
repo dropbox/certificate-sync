@@ -15,13 +15,15 @@ class ExportConfigurationItem {
     let owner: String?
     let mode: mode_t
     let pemEncode: Bool
+    let password: String?
     
-    init(format: SecExternalFormat, path: URL, owner: String?, mode: mode_t, pemArmor: Bool) {
+    init(format: SecExternalFormat, path: URL, owner: String?, mode: mode_t, pemArmor: Bool, password: String?) {
         self.format = format
         self.path = path
         self.owner = owner
         self.mode = mode
         self.pemEncode = pemArmor
+        self.password = password
     }
     
     static func parse(configuration: [ String : Any ]) -> ExportConfigurationItem {
@@ -41,8 +43,10 @@ class ExportConfigurationItem {
         
         let owner = configuration["owner"] as? String
         
+        let password = configuration["password"] as? String
+        
         let path = (configuration["path"] as! String).toFileURL()
         
-        return ExportConfigurationItem(format: format, path: path, owner: owner, mode: mode, pemArmor: pemArmor)
+        return ExportConfigurationItem(format: format, path: path, owner: owner, mode: mode, pemArmor: pemArmor, password: password)
     }
 }

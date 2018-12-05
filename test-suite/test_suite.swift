@@ -12,11 +12,14 @@ import XCTest
 class test_suite: XCTestCase {
     
     var testConfiguration: URL!
-    let tag = "com.dropbox.entsec.certificate-sync.tests".data(using: .utf8)!
+    let tempDirectoryURL = NSURL.fileURL(withPath: NSTemporaryDirectory(), isDirectory: true)
+    let tag = "com.dropbox.entsec.certificate-sync.tests"
 
     override func setUp() {
         let selfBundle = Bundle(for: type(of: self))
         testConfiguration = selfBundle.url(forResource: "test_configuration", withExtension: "plist")
+        
+        FileManager.default.changeCurrentDirectoryPath(tempDirectoryURL.absoluteString.toUnixPath())
     }
 
     override func tearDown() {
@@ -24,9 +27,8 @@ class test_suite: XCTestCase {
     }
     
     private func getKeychainCopy() -> (URL, SecKeychain) {
-        let tempDirectoryURL = NSURL.fileURL(withPath: NSTemporaryDirectory(), isDirectory: true)
-        
         let tempKeychainFile = tempDirectoryURL.appendingPathComponent("\(UUID().uuidString)-demo.keychain")
+        print(tempKeychainFile)
 
         var keychain: SecKeychain?
         assert(SecKeychainCreate(tempKeychainFile.absoluteString.toUnixPath(), 0, "", false, nil, &keychain) == kOSReturnSuccess)
@@ -36,10 +38,10 @@ class test_suite: XCTestCase {
         
         let generationAttributes: [String: Any] = [
             kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
-            kSecAttrKeySizeInBits as String: 4096,
+            kSecAttrKeySizeInBits as String: 2048,
             kSecPrivateKeyAttrs as String: [
                 kSecAttrIsPermanent as String: true,
-                kSecAttrApplicationTag as String: tag
+                kSecAttrApplicationTag as String: tag.data(using: .utf8)!
             ]
         ]
         
@@ -47,7 +49,7 @@ class test_suite: XCTestCase {
         
         let storePublicKey: [String: Any] = [
             kSecClass as String: kSecClassKey,
-            kSecAttrApplicationTag as String: "\(tag).public",
+            kSecAttrApplicationTag as String: "\(tag).public".data(using: .utf8)!,
             kSecValueRef as String: publicKey!,
             kSecUseKeychain as String: keychain!
         ]
@@ -141,18 +143,9 @@ class test_suite: XCTestCase {
     }
     
     private func modifyConfigurationForDemoKeychain(configuration: Configuration, demoKeychainPath: URL, issuer: Data) -> Configuration {
-        let tempDirectoryURL = NSURL.fileURL(withPath: NSTemporaryDirectory(), isDirectory: true)
-        
         let mapping = configuration.items.map { (item) -> ConfigurationItem in
             if item.keychainPath == "demo.keychain" {
-                
-                let exports = item.exports.map({ (export) -> ExportConfigurationItem in
-                    let newPath = tempDirectoryURL.appendingPathComponent(export.path.absoluteString)
-                    
-                    return ExportConfigurationItem(format: export.format, path: newPath, owner: export.owner, mode: export.mode, pemArmor: export.pemEncode)
-                })
-                
-                return ConfigurationItem(issuer: issuer, exports: exports, acls: item.acls, keychainPath: demoKeychainPath.absoluteString, password: item.password)
+                return ConfigurationItem(issuer: issuer, exports: item.exports, acls: item.acls, keychainPath: demoKeychainPath.absoluteString, password: item.password)
             }
             else {
                 return item
@@ -224,7 +217,7 @@ class test_suite: XCTestCase {
         
         assert(results.count == 1)
         
-        syncronizer.ensureSelfInOwnerACL(identity: (results.first?.1)!)
+        syncronizer.ensureSelfInOwnerACL(identity: (results.first?.identity)!)
     }
 
     func testExportItems() {
@@ -240,5 +233,57 @@ class test_suite: XCTestCase {
         assert(results.count == 1)
         
         syncronizer.exportKeychainItems(items: results)
+        
+        for item in configuration.items {
+            for export in item.exports {
+                assert(FileManager.default.fileExists(atPath: export.path.absoluteString.toUnixPath()))
+            }
+        }
+    }
+    
+    func testSetACLForApplications() {
+        let (keychainCopy, keychain) = getKeychainCopy()
+        let issuer = getCertificateIssuer(keychain: keychain)
+        
+        let configuration = modifyConfigurationForDemoKeychain(configuration: Configuration.read(path: testConfiguration), demoKeychainPath: keychainCopy, issuer: issuer)
+        
+        let syncronizer = Syncronizer(configuration: configuration)
+        
+        syncronizer.ensureACLContainsApps(items: syncronizer.mapIdentities())
+    }
+    
+    func testSetupAllACLs() {
+        let (keychainCopy, keychain) = getKeychainCopy()
+        let issuer = getCertificateIssuer(keychain: keychain)
+        
+        let configuration = modifyConfigurationForDemoKeychain(configuration: Configuration.read(path: testConfiguration), demoKeychainPath: keychainCopy, issuer: issuer)
+        
+        let syncronizer = Syncronizer(configuration: configuration)
+        let items = syncronizer.mapIdentities()
+        
+        for item in items {
+            syncronizer.ensureSelfInOwnerACL(identity: item.identity)
+        }
+        syncronizer.ensureACLContainsApps(items: items)
+    }
+    
+    func testSetupAllACLsIdempotent() {
+        let (keychainCopy, keychain) = getKeychainCopy()
+        let issuer = getCertificateIssuer(keychain: keychain)
+        
+        let configuration = modifyConfigurationForDemoKeychain(configuration: Configuration.read(path: testConfiguration), demoKeychainPath: keychainCopy, issuer: issuer)
+        
+        let syncronizer = Syncronizer(configuration: configuration)
+        let items = syncronizer.mapIdentities()
+        
+        for item in items {
+            syncronizer.ensureSelfInOwnerACL(identity: item.identity)
+        }
+        syncronizer.ensureACLContainsApps(items: items)
+        
+        for item in items {
+            syncronizer.ensureSelfInOwnerACL(identity: item.identity)
+        }
+        syncronizer.ensureACLContainsApps(items: items)
     }
 }

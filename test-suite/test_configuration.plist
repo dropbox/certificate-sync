@@ -21,7 +21,9 @@
 				</dict>
 			</array>
 			<key>acl</key>
-			<array/>
+			<array>
+				<string>bundle:com.google.Chrome</string>
+			</array>
 			<key>issuer</key>
 			<string>MHcxFzAVBgNVBAMMDmRlbW8ubG9jYWxob3N0MRkwFwYDVQQKDBBDZXJ0aWZpY2F0ZSBTeW5jMRIwEAYDVQQLDAlUZXN0IFVuaXQxCzAJBgNVBAgMAktTMQswCQYDVQQGEwJVUzETMBEGA1UEBwwKU21hbGx2aWxsZQ==</string>
 			<key>keychain</key>

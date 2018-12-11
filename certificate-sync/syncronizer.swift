@@ -9,8 +9,6 @@
 import Foundation
 
 class Syncronizer {
-    let privateKeyACLDescription = "com.dropbox.certificate-sync.acl"
-    
     let requiredAuthorization = [ kSecACLAuthorizationSign,
                                   kSecACLAuthorizationMAC,
                                   kSecACLAuthorizationDerive,
@@ -25,15 +23,21 @@ class Syncronizer {
     func run() {
         let identities = mapIdentities()
         
-        for (_, identity) in identities {
-            ensureSelfInOwnerACL(identity: identity)
+        for (item, identity) in identities {
+            if item.claimOwner {
+                ensureSelfInOwnerACL(identity: identity)
+            }
         }
+        
+        ensureACLContainsApps(aclName: configuration.aclName, items: identities)
+        
+        exportKeychainItems(items: identities)
     }
     
     func getKeychains() -> [ String: SecKeychain ] {
         var result = [ String : SecKeychain ]()
         
-        for item in configuration.items {
+        for item in configuration.existing {
             var keychain: SecKeychain?
             assert(SecKeychainOpen(item.keychainPath, &keychain) == kOSReturnSuccess)
             
@@ -83,7 +87,7 @@ class Syncronizer {
             for identityItem in (items! as! [[String: Any]]) {
                 let identityIssuer = identityItem[kSecAttrIssuer as String] as! NSData
                 
-                let configurationItems = configuration.items.filter { (item) -> Bool in
+                let configurationItems = configuration.existing.filter { (item) -> Bool in
                     return item.issuer == identityIssuer as Data
                 }
                 
@@ -175,7 +179,7 @@ class Syncronizer {
         return applicationListArray as CFArray
     }
     
-    func ensureACLContainsApps(items: [ ( configuration: ConfigurationItem, identity: SecIdentity ) ]) {
+    func ensureACLContainsApps(aclName: String, items: [ ( configuration: ConfigurationItem, identity: SecIdentity ) ]) {
         for item in items {
             var privateKey: SecKey?
             var access: SecAccess?
@@ -204,7 +208,7 @@ class Syncronizer {
                 
                 let description = descriptionString as String?
                 
-                if description != privateKeyACLDescription { continue }
+                if description != aclName { continue }
                 
                 foundACL = true
                 
@@ -235,7 +239,7 @@ class Syncronizer {
                     item.trustedAppliction
                 } as CFArray
                 
-                assert(SecACLCreateWithSimpleContents(access!, applications, privateKeyACLDescription as CFString, promptSelector, &acl) == kOSReturnSuccess)
+                assert(SecACLCreateWithSimpleContents(access!, applications, aclName as CFString, promptSelector, &acl) == kOSReturnSuccess)
                 assert(acl != nil)
                 
                 let authorizations = requiredAuthorization as CFArray

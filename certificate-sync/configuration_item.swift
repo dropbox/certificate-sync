@@ -14,15 +14,17 @@ class ConfigurationItem {
     let acls: [ACLConfigurationItem]
     let keychainPath: String
     let password: String?
+    let claimOwner: Bool
     
     /// You should really never use the password form, this is for unit testing only
     /// Will attempt to make debug pramgma later TODO
-    init(issuer: Data, exports: [ExportConfigurationItem], acls: [ACLConfigurationItem], keychainPath: String, password: String?) {
+    init(issuer: Data, exports: [ExportConfigurationItem], acls: [ACLConfigurationItem], keychainPath: String, password: String?, claimOwner: Bool) {
         self.issuer = issuer
         self.exports = exports
         self.acls = acls
         self.keychainPath = keychainPath
         self.password = password
+        self.claimOwner = claimOwner
     }
 
     static func parse(configuration : [ String : Any ]) -> ConfigurationItem {
@@ -30,6 +32,7 @@ class ConfigurationItem {
         var keychainPath: String!
         let keychainValue = configuration["keychain"] as! String
         let password = configuration["password"] as? String
+        let claimOwner = configuration["claim_owner"] as? Bool ?? true
         
         switch keychainValue {
         case "system":
@@ -49,6 +52,6 @@ class ConfigurationItem {
             return ACLConfigurationItem.parse(configuration: item)
         }
         
-        return ConfigurationItem(issuer: issuer, exports: exports, acls: acls, keychainPath: keychainPath, password: password)
+        return ConfigurationItem(issuer: issuer, exports: exports, acls: acls, keychainPath: keychainPath, password: password, claimOwner: claimOwner)
     }
 }

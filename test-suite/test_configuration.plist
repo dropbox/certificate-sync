@@ -2,9 +2,26 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>items</key>
+	<key>import</key>
 	<array>
 		<dict>
+			<key>claim_owner</key>
+			<false/>
+			<key>acl</key>
+			<array>
+				<string>bundle:com.google.Chrome</string>
+			</array>
+			<key>path</key>
+			<string></string>
+		</dict>
+	</array>
+	<key>acl_name</key>
+	<string>com.dropbox.certificate-sync.acl</string>
+	<key>existing</key>
+	<array>
+		<dict>
+			<key>claim_owner</key>
+			<true/>
 			<key>export</key>
 			<array>
 				<dict>

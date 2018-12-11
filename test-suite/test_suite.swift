@@ -143,16 +143,16 @@ class test_suite: XCTestCase {
     }
     
     private func modifyConfigurationForDemoKeychain(configuration: Configuration, demoKeychainPath: URL, issuer: Data) -> Configuration {
-        let mapping = configuration.items.map { (item) -> ConfigurationItem in
+        let mapping = configuration.existing.map { (item) -> ConfigurationItem in
             if item.keychainPath == "demo.keychain" {
-                return ConfigurationItem(issuer: issuer, exports: item.exports, acls: item.acls, keychainPath: demoKeychainPath.absoluteString, password: item.password)
+                return ConfigurationItem(issuer: issuer, exports: item.exports, acls: item.acls, keychainPath: demoKeychainPath.absoluteString, password: item.password, claimOwner: item.claimOwner)
             }
             else {
                 return item
             }
         }
         
-        return Configuration(items: mapping)
+        return Configuration(aclName: configuration.aclName, existing: mapping, imports: configuration.imports)
     }
     
     private func getCertificateIssuer(keychain: SecKeychain) -> Data {
@@ -234,7 +234,7 @@ class test_suite: XCTestCase {
         
         syncronizer.exportKeychainItems(items: results)
         
-        for item in configuration.items {
+        for item in configuration.existing {
             for export in item.exports {
                 assert(FileManager.default.fileExists(atPath: export.path.absoluteString.toUnixPath()))
             }
@@ -249,7 +249,7 @@ class test_suite: XCTestCase {
         
         let syncronizer = Syncronizer(configuration: configuration)
         
-        syncronizer.ensureACLContainsApps(items: syncronizer.mapIdentities())
+        syncronizer.ensureACLContainsApps(aclName: configuration.aclName, items: syncronizer.mapIdentities())
     }
     
     func testSetupAllACLs() {
@@ -264,7 +264,7 @@ class test_suite: XCTestCase {
         for item in items {
             syncronizer.ensureSelfInOwnerACL(identity: item.identity)
         }
-        syncronizer.ensureACLContainsApps(items: items)
+        syncronizer.ensureACLContainsApps(aclName: configuration.aclName, items: items)
     }
     
     func testSetupAllACLsIdempotent() {
@@ -279,11 +279,11 @@ class test_suite: XCTestCase {
         for item in items {
             syncronizer.ensureSelfInOwnerACL(identity: item.identity)
         }
-        syncronizer.ensureACLContainsApps(items: items)
+        syncronizer.ensureACLContainsApps(aclName: configuration.aclName, items: items)
         
         for item in items {
             syncronizer.ensureSelfInOwnerACL(identity: item.identity)
         }
-        syncronizer.ensureACLContainsApps(items: items)
+        syncronizer.ensureACLContainsApps(aclName: configuration.aclName, items: items)
     }
 }

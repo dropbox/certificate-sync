@@ -25,6 +25,8 @@
 		C9BB241A21AF2BEE00CCE007 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB23EB219CE3C800CCE007 /* main.swift */; };
 		C9BB241D21B072A300CCE007 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9BB241C21B072A300CCE007 /* libcrypto.a */; };
 		C9BB241F21B072BD00CCE007 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9BB241E21B072BD00CCE007 /* libssl.a */; };
+		C9BFF29E21C057D700A4C582 /* import_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BFF29D21C057D700A4C582 /* import_item.swift */; };
+		C9BFF29F21C06EF100A4C582 /* import_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BFF29D21C057D700A4C582 /* import_item.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -55,6 +57,7 @@
 		C9BB241C21B072A300CCE007 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = ../../../../../usr/local/Cellar/openssl/1.0.2p/lib/libcrypto.a; sourceTree = "<group>"; };
 		C9BB241E21B072BD00CCE007 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = ../../../../../usr/local/Cellar/openssl/1.0.2p/lib/libssl.a; sourceTree = "<group>"; };
 		C9BB242021B0737A00CCE007 /* bridging-header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "bridging-header.h"; sourceTree = "<group>"; };
+		C9BFF29D21C057D700A4C582 /* import_item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = import_item.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +109,7 @@
 				C9BB23F921A73E9C00CCE007 /* acl_configuration_item.swift */,
 				C9BB23FB21A76F5000CCE007 /* extensions.swift */,
 				C9BB23FD21A77DA200CCE007 /* syncronizer.swift */,
+				C9BFF29D21C057D700A4C582 /* import_item.swift */,
 			);
 			path = "certificate-sync";
 			sourceTree = "<group>";
@@ -224,6 +228,7 @@
 				C9BB23FA21A73E9C00CCE007 /* acl_configuration_item.swift in Sources */,
 				C9BB23EC219CE3C800CCE007 /* main.swift in Sources */,
 				C9BB23F821A73E9400CCE007 /* export_configuration_item.swift in Sources */,
+				C9BFF29E21C057D700A4C582 /* import_item.swift in Sources */,
 				C9BB23F621A73E4E00CCE007 /* configuration.swift in Sources */,
 				C9BB23F421A628B200CCE007 /* configuration_item.swift in Sources */,
 			);
@@ -234,6 +239,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C9BB241621AF2BDE00CCE007 /* acl_configuration_item.swift in Sources */,
+				C9BFF29F21C06EF100A4C582 /* import_item.swift in Sources */,
 				C9BB241721AF2BE200CCE007 /* configuration.swift in Sources */,
 				C9BB241A21AF2BEE00CCE007 /* main.swift in Sources */,
 				C9BB241421AF2BD800CCE007 /* syncronizer.swift in Sources */,

@@ -9,10 +9,14 @@
 import Foundation
 
 class Configuration {
-    let items: [ ConfigurationItem ]
+    let aclName: String
+    let existing: [ ConfigurationItem ]
+    let imports: [ ImportItem ]
     
-    init(items : [ ConfigurationItem ]) {
-        self.items = items
+    init(aclName: String, existing : [ ConfigurationItem ], imports: [ ImportItem ]) {
+        self.aclName = aclName
+        self.existing = existing
+        self.imports = imports
     }
     
     static func read(path: URL) -> Configuration {
@@ -20,10 +24,17 @@ class Configuration {
         
         assert(configuration != nil)
         
-        let items = configuration!.value(forKey: "items") as! [ [ String : Any ] ]
+        let items = configuration!.value(forKey: "existing") as? [ [ String : Any ] ] ?? []
+        let aclName = configuration!.value(forKey: "acl_name") as? String ?? "com.dropbox.certificate-sync.acl"
         
-        return Configuration(items: items.map({ (item) -> ConfigurationItem in
+        let existing = items.map({ (item) -> ConfigurationItem in
             return ConfigurationItem.parse(configuration: item)
-        }))
+        })
+        
+        let imports = (configuration!.value(forKey: "imports") as? [ [ String : Any ] ] ?? []).map { (item) -> ImportItem in
+            return ImportItem.parse(configuration: item)
+        }
+        
+        return Configuration(aclName: aclName, existing: existing, imports: imports)
     }
 }

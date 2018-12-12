@@ -16,6 +16,8 @@ class Syncronizer {
     
     let configuration: Configuration
     
+    var keychains: [ String : SecKeychain ]?
+    
     init(configuration: Configuration) {
         self.configuration = configuration
     }
@@ -32,40 +34,54 @@ class Syncronizer {
         ensureACLContainsApps(aclName: configuration.aclName, items: identities)
         
         exportKeychainItems(items: identities)
+        
+        importKeychainItems(items: configuration.imports)
     }
     
-    func getKeychains() -> [ String: SecKeychain ] {
-        var result = [ String : SecKeychain ]()
+    func openKeychain(path: String, password: String?) -> SecKeychain {
+        var keychain: SecKeychain?
+        assert(SecKeychainOpen(path, &keychain) == kOSReturnSuccess)
         
-        for item in configuration.existing {
-            var keychain: SecKeychain?
-            assert(SecKeychainOpen(item.keychainPath, &keychain) == kOSReturnSuccess)
-            
-            if result.keys.contains(item.keychainPath) == false {
-                var keychain: SecKeychain?
-                
-                assert(SecKeychainOpen(item.keychainPath.toUnixPath(), &keychain) == kOSReturnSuccess)
-                
-                var keychainStatus = SecKeychainStatus()
-                assert(SecKeychainGetStatus(keychain!, &keychainStatus) == kOSReturnSuccess)
-                
-                if ((keychainStatus & kSecUnlockStateStatus) == 0) {
-                    if item.password != nil {
-                        assert(SecKeychainUnlock(keychain!, UInt32(item.password!.count), item.password!, true) == kOSReturnSuccess)
-                    }
-                    else {
-                        assert(SecKeychainUnlock(keychain!, 0, "", false) == kOSReturnSuccess)
-                    }
-                }
-                
-                assert(SecKeychainGetStatus(keychain!, &keychainStatus) == kOSReturnSuccess)
-                assert((keychainStatus & kSecUnlockStateStatus > 0) && (keychainStatus & kSecReadPermStatus > 0) && (keychainStatus & kSecWritePermStatus > 0))
-                
-                result[item.keychainPath] = keychain!
+        assert(SecKeychainOpen(path.toUnixPath(), &keychain) == kOSReturnSuccess)
+        
+        var keychainStatus = SecKeychainStatus()
+        assert(SecKeychainGetStatus(keychain!, &keychainStatus) == kOSReturnSuccess)
+        
+        if ((keychainStatus & kSecUnlockStateStatus) == 0) {
+            if password != nil {
+                assert(SecKeychainUnlock(keychain!, UInt32(password!.count), password!, true) == kOSReturnSuccess)
+            }
+            else {
+                assert(SecKeychainUnlock(keychain!, 0, "", false) == kOSReturnSuccess)
             }
         }
         
-        return result
+        assert(SecKeychainGetStatus(keychain!, &keychainStatus) == kOSReturnSuccess)
+        assert((keychainStatus & kSecUnlockStateStatus > 0) && (keychainStatus & kSecReadPermStatus > 0) && (keychainStatus & kSecWritePermStatus > 0))
+        
+        return keychain!
+    }
+    
+    func getKeychains() -> [ String : SecKeychain ] {
+        if keychains != nil {
+            return self.keychains!
+        }
+        
+        self.keychains = [ String : SecKeychain ]()
+        
+        for item in configuration.existing {
+            if self.keychains!.keys.contains(item.keychainPath) == false {
+                self.keychains![item.keychainPath] = openKeychain(path: item.keychainPath, password: item.password)
+            }
+        }
+        
+        for item in configuration.imports {
+            if self.keychains!.keys.contains(item.keychainPath) == false {
+                self.keychains![item.keychainPath] = openKeychain(path: item.keychainPath, password: item.password)
+            }
+        }
+        
+        return self.keychains!
     }
     
     func mapIdentities() -> [ ( configuration: ConfigurationItem, identity: SecIdentity ) ] {
@@ -179,75 +195,116 @@ class Syncronizer {
         return applicationListArray as CFArray
     }
     
+    func ensureItemHasACL(aclName: String, identity: SecIdentity, acl: [ ACLConfigurationItem ]) {
+        var privateKey: SecKey?
+        var access: SecAccess?
+        var aclListArray: CFArray?
+        
+        assert(SecIdentityCopyPrivateKey(identity, &privateKey) == kOSReturnSuccess)
+        assert(privateKey != nil)
+        
+        let privateKeyItem = (privateKey as Any) as! SecKeychainItem
+        
+        assert(SecKeychainItemCopyAccess(privateKeyItem, &access) == kOSReturnSuccess)
+        assert(access != nil)
+        
+        assert(SecAccessCopyACLList(access!, &aclListArray) == kOSReturnSuccess)
+        assert(aclListArray != nil)
+        let acls = aclListArray as! [ SecACL ]
+        
+        var foundACL = false
+        
+        for existingACL in acls {
+            var applicationListArray: CFArray?
+            var descriptionString: CFString?
+            var promptSelector = SecKeychainPromptSelector()
+            
+            assert(SecACLCopyContents(existingACL, &applicationListArray, &descriptionString, &promptSelector) == kOSReturnSuccess)
+            
+            let description = descriptionString as String?
+            
+            if description != aclName { continue }
+            
+            foundACL = true
+            
+            let applications = acl.map { (aclEntry) -> SecTrustedApplication in
+                return aclEntry.trustedAppliction
+            }
+            
+            applicationListArray = updateApplicationList(existing: applicationListArray, applications: applications)
+            
+            var authorizations = SecACLCopyAuthorizations(existingACL) as! [ CFString ]
+            
+            for authorization in requiredAuthorization {
+                if authorizations.contains(authorization) == false {
+                    authorizations.append(authorization)
+                }
+            }
+            
+            assert(SecACLUpdateAuthorizations(existingACL, authorizations as CFArray) == kOSReturnSuccess)
+            
+            assert(SecACLSetContents(existingACL, applicationListArray, description! as CFString, promptSelector) == kOSReturnSuccess)
+        }
+        
+        if foundACL == false {
+            var newACL: SecACL?
+            let promptSelector = SecKeychainPromptSelector()
+            
+            let applications = acl.map { (item) -> SecTrustedApplication in
+                item.trustedAppliction
+                } as CFArray
+            
+            assert(SecACLCreateWithSimpleContents(access!, applications, aclName as CFString, promptSelector, &newACL) == kOSReturnSuccess)
+            assert(newACL != nil)
+            
+            let authorizations = requiredAuthorization as CFArray
+            
+            assert(SecACLUpdateAuthorizations(newACL!, authorizations) == kOSReturnSuccess)
+        }
+        
+        assert(SecKeychainItemSetAccess(privateKeyItem, access!) == kOSReturnSuccess)
+    }
+    
     func ensureACLContainsApps(aclName: String, items: [ ( configuration: ConfigurationItem, identity: SecIdentity ) ]) {
         for item in items {
-            var privateKey: SecKey?
-            var access: SecAccess?
-            var aclListArray: CFArray?
+            ensureItemHasACL(aclName: aclName, identity: item.identity, acl: item.configuration.acls)
+        }
+    }
+    
+    func importKeychainItems(items: [ ImportItem ]) {
+        for importItem in items {
+            
+            let keychain = getKeychains()[importItem.keychainPath]
+            let path = importItem.path.absoluteString.toUnixPath()
+            
+            let data = NSData.init(contentsOf: importItem.path)
+            var externalFormat = SecExternalFormat.formatPEMSequence
+            var itemType = SecExternalItemType.itemTypePrivateKey
+            let importFlags = SecItemImportExportFlags.pemArmour
+            
+            var importParameters = SecItemImportExportKeyParameters()
 
-            assert(SecIdentityCopyPrivateKey(item.identity, &privateKey) == kOSReturnSuccess)
-            assert(privateKey != nil)
+            var resultItems = NSArray.init() as CFArray?
+            var error: CFError?
             
-            let privateKeyItem = (privateKey as Any) as! SecKeychainItem
+            let attributes: [ String: Any ] = [
+                kSecAttrKeyClass as String: kSecAttrKeyClassPrivate,
+                kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
+                kSecAttrKeySizeInBits as String: 256
+            ]
             
-            assert(SecKeychainItemCopyAccess(privateKeyItem, &access) == kOSReturnSuccess)
-            assert(access != nil)
+            let result = SecKeyCreateWithData(data!, attributes as CFDictionary, &error)
+            assert(error == nil)
             
-            assert(SecAccessCopyACLList(access!, &aclListArray) == kOSReturnSuccess)
-            assert(aclListArray != nil)
-            let acls = aclListArray as! [ SecACL ]
-            
-            var foundACL = false
-            
-            for acl in acls {
-                var applicationListArray: CFArray?
-                var descriptionString: CFString?
-                var promptSelector = SecKeychainPromptSelector()
-                
-                assert(SecACLCopyContents(acl, &applicationListArray, &descriptionString, &promptSelector) == kOSReturnSuccess)
-                
-                let description = descriptionString as String?
-                
-                if description != aclName { continue }
-                
-                foundACL = true
-                
-                let applications = item.configuration.acls.map { (acl) -> SecTrustedApplication in
-                    return acl.trustedAppliction
-                }
-
-                applicationListArray = updateApplicationList(existing: applicationListArray, applications: applications)
-
-                var authorizations = SecACLCopyAuthorizations(acl) as! [ CFString ]
-                
-                for authorization in requiredAuthorization {
-                    if authorizations.contains(authorization) == false {
-                        authorizations.append(authorization)
+            for importedItem in resultItems as! [ SecKeychainItem ] {
+                if CFGetTypeID(importedItem) == SecIdentityGetTypeID() {
+                    if importItem.claimOwner {
+                        ensureSelfInOwnerACL(identity: importedItem as! SecIdentity)
                     }
+                    
+                    
                 }
-                
-                assert(SecACLUpdateAuthorizations(acl, authorizations as CFArray) == kOSReturnSuccess)
-                
-                assert(SecACLSetContents(acl, applicationListArray, description! as CFString, promptSelector) == kOSReturnSuccess)
             }
-            
-            if foundACL == false {
-                var acl: SecACL?
-                let promptSelector = SecKeychainPromptSelector()
-                
-                let applications = item.configuration.acls.map { (item) -> SecTrustedApplication in
-                    item.trustedAppliction
-                } as CFArray
-                
-                assert(SecACLCreateWithSimpleContents(access!, applications, aclName as CFString, promptSelector, &acl) == kOSReturnSuccess)
-                assert(acl != nil)
-                
-                let authorizations = requiredAuthorization as CFArray
-                
-                assert(SecACLUpdateAuthorizations(acl!, authorizations) == kOSReturnSuccess)
-            }
-            
-            assert(SecKeychainItemSetAccess(privateKeyItem, access!) == kOSReturnSuccess)
         }
     }
     

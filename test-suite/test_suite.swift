@@ -40,8 +40,10 @@ class test_suite: XCTestCase {
             kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
             kSecAttrKeySizeInBits as String: 2048,
             kSecPrivateKeyAttrs as String: [
-                kSecAttrIsPermanent as String: true,
-                kSecAttrApplicationTag as String: tag.data(using: .utf8)!
+                kSecAttrIsPermanent as String: false
+            ],
+            kSecPublicKeyAttrs as String: [
+                kSecAttrIsPermanent as String: false
             ]
         ]
         
@@ -152,7 +154,14 @@ class test_suite: XCTestCase {
             }
         }
         
-        return Configuration(aclName: configuration.aclName, existing: mapping, imports: configuration.imports)
+        let selfBundle = Bundle(for: type(of: self))
+        let imports = configuration.imports.map { (item) -> ImportItem in
+            let path = selfBundle.resourceURL?.appendingPathComponent(item.path.lastPathComponent)
+            
+            return ImportItem(format: item.format, path: path!, aclEntries: item.acls, claimOwner: item.claimOwner, keychainPath: item.keychainPath, password: item.password)
+        }
+        
+        return Configuration(aclName: configuration.aclName, existing: mapping, imports: imports)
     }
     
     private func getCertificateIssuer(keychain: SecKeychain) -> Data {
@@ -175,6 +184,36 @@ class test_suite: XCTestCase {
     func testLoadConfiguration() {
         let _ = Configuration.read(path: testConfiguration)
     }
+    
+    func testImportItems() {
+        let (keychainCopy, keychain) = getKeychainCopy()
+        let issuer = getCertificateIssuer(keychain: keychain)
+        
+        let configuration = modifyConfigurationForDemoKeychain(configuration: Configuration.read(path: testConfiguration), demoKeychainPath: keychainCopy, issuer: issuer)
+        
+        let syncronizer = Syncronizer(configuration: configuration)
+        
+        let itemCount = countKeychainItems(keychain: keychain, type: kSecClassKey)
+        
+        syncronizer.importKeychainItems(items: configuration.imports)
+        
+        assert(countKeychainItems(keychain: keychain, type: kSecClassKey) == itemCount + 1)
+    }
+    
+    private func countKeychainItems(keychain: SecKeychain, type: CFString) -> Int {
+        var result: CFTypeRef?
+        
+        let query = [ kSecClass : kSecClassKey,
+                      kSecMatchLimit : kSecMatchLimitAll,
+                      kSecMatchSearchList : [ keychain ],
+                      kSecReturnAttributes : true ] as [CFString : Any]
+        
+        assert(SecItemCopyMatching(query as CFDictionary, &result) == kOSReturnSuccess)
+        
+        let resultsArray = result as! [ SecKey ]
+        
+        return resultsArray.count
+    }
 
     func testMapIdentities() {
         let (keychainCopy, keychain) = getKeychainCopy()
@@ -187,6 +226,10 @@ class test_suite: XCTestCase {
         let results = syncronizer.mapIdentities()
         
         assert(results.count == 1)
+        
+        let itemCount = countKeychainItems(keychain: keychain, type: kSecClassKey)
+        
+        assert(itemCount == 2)
     }
     
     func testKeychainPathValid() {

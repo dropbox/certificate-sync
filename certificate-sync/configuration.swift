@@ -31,7 +31,7 @@ class Configuration {
             return ConfigurationItem.parse(configuration: item)
         })
         
-        let imports = (configuration!.value(forKey: "imports") as? [ [ String : Any ] ] ?? []).map { (item) -> ImportItem in
+        let imports = (configuration!.value(forKey: "import") as? [ [ String : Any ] ] ?? []).map { (item) -> ImportItem in
             return ImportItem.parse(configuration: item)
         }
         

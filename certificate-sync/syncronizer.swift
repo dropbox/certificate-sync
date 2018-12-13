@@ -287,7 +287,7 @@ class Syncronizer {
             var resultItems = NSArray.init() as CFArray?
             
             let result = SecItemImport(data!, path as CFString, &externalFormat, &itemType, importFlags, &importParameters, keychain!, &resultItems)
-            assert(result == kOSReturnSuccess)
+            assert(result == kOSReturnSuccess || result == errSecDuplicateItem)
             
             for importedItem in resultItems as! [ SecKeychainItem ] {
                 if CFGetTypeID(importedItem) == SecIdentityGetTypeID() {
@@ -295,7 +295,7 @@ class Syncronizer {
                         ensureSelfInOwnerACL(identity: importedItem as! SecIdentity)
                     }
                     
-                    
+                    ensureItemHasACL(aclName: configuration.aclName, identity: importedItem as! SecIdentity, acl: importItem.acls)
                 }
             }
         }

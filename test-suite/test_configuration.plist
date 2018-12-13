@@ -2,15 +2,21 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>acl_name</key>
+	<string>com.dropbox.certificate-sync.acl</string>
 	<key>import</key>
 	<array>
 		<dict>
+			<key>path</key>
+			<string>rsa_key.cer</string>
 			<key>keychain</key>
 			<string>demo.keychain</string>
-			<key>format</key>
-			<string>openssl</string>
+		</dict>
+		<dict>
+			<key>keychain</key>
+			<string>demo.keychain</string>
 			<key>claim_owner</key>
-			<false/>
+			<true/>
 			<key>acl</key>
 			<array>
 				<string>bundle:com.google.Chrome</string>
@@ -19,8 +25,6 @@
 			<string>rsa_key.pem</string>
 		</dict>
 	</array>
-	<key>acl_name</key>
-	<string>com.dropbox.certificate-sync.acl</string>
 	<key>existing</key>
 	<array>
 		<dict>

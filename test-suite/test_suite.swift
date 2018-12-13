@@ -159,7 +159,7 @@ class test_suite: XCTestCase {
             let path = selfBundle.resourceURL?.appendingPathComponent(item.path.lastPathComponent)
             
             if item.keychainPath == "demo.keychain" {
-                return ImportItem(format: item.format, path: path!, aclEntries: item.acls, claimOwner: item.claimOwner, keychainPath: demoKeychainPath.absoluteString, password: item.password)
+                return ImportItem(path: path!, aclEntries: item.acls, claimOwner: item.claimOwner, keychainPath: demoKeychainPath.absoluteString, password: item.password)
             }
             else {
                 return item

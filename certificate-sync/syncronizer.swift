@@ -278,23 +278,16 @@ class Syncronizer {
             let path = importItem.path.absoluteString.toUnixPath()
             
             let data = NSData.init(contentsOf: importItem.path)
-            var externalFormat = SecExternalFormat.formatPEMSequence
-            var itemType = SecExternalItemType.itemTypePrivateKey
-            let importFlags = SecItemImportExportFlags.pemArmour
+            var externalFormat = SecExternalFormat.formatUnknown
+            var itemType = SecExternalItemType.itemTypeUnknown
+            let importFlags = SecItemImportExportFlags()
             
             var importParameters = SecItemImportExportKeyParameters()
 
             var resultItems = NSArray.init() as CFArray?
-            var error: CFError?
             
-            let attributes: [ String: Any ] = [
-                kSecAttrKeyClass as String: kSecAttrKeyClassPrivate,
-                kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
-                kSecAttrKeySizeInBits as String: 256
-            ]
-            
-            let result = SecKeyCreateWithData(data!, attributes as CFDictionary, &error)
-            assert(error == nil)
+            let result = SecItemImport(data!, path as CFString, &externalFormat, &itemType, importFlags, &importParameters, keychain!, &resultItems)
+            assert(result == kOSReturnSuccess)
             
             for importedItem in resultItems as! [ SecKeychainItem ] {
                 if CFGetTypeID(importedItem) == SecIdentityGetTypeID() {

@@ -5,6 +5,8 @@
 	<key>import</key>
 	<array>
 		<dict>
+			<key>keychain</key>
+			<string>demo.keychain</string>
 			<key>format</key>
 			<string>openssl</string>
 			<key>claim_owner</key>
@@ -14,7 +16,7 @@
 				<string>bundle:com.google.Chrome</string>
 			</array>
 			<key>path</key>
-			<string>ec_key.pem</string>
+			<string>rsa_key.pem</string>
 		</dict>
 	</array>
 	<key>acl_name</key>

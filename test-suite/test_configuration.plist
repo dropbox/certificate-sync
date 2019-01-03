@@ -13,6 +13,8 @@
 			<string>demo.keychain</string>
 		</dict>
 		<dict>
+			<key>label</key>
+			<string>demo private key</string>
 			<key>keychain</key>
 			<string>demo.keychain</string>
 			<key>claim_owner</key>

@@ -45,6 +45,7 @@
 
 /* Begin PBXFileReference section */
 		C913728221C2F0E700F8A54C /* rsa_key.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = rsa_key.pem; sourceTree = "<group>"; };
+		C9A71D8821CD827D00BA1D50 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C9BB23E8219CE3C800CCE007 /* certificate-sync */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "certificate-sync"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9BB23EB219CE3C800CCE007 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C9BB23F321A628B200CCE007 /* configuration_item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = configuration_item.swift; sourceTree = "<group>"; };
@@ -114,6 +115,7 @@
 				C9BB23FB21A76F5000CCE007 /* extensions.swift */,
 				C9BB23FD21A77DA200CCE007 /* syncronizer.swift */,
 				C9BFF29D21C057D700A4C582 /* import_item.swift */,
+				C9A71D8821CD827D00BA1D50 /* Info.plist */,
 			);
 			path = "certificate-sync";
 			sourceTree = "<group>";
@@ -379,9 +381,13 @@
 		C9BB23F0219CE3C800CCE007 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = DWVXMLB45Y;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_STYLE = Manual;
+				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
+				DEVELOPMENT_TEAM = VNH7T7682X;
+				INFOPLIST_FILE = "certificate-sync/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
@@ -389,9 +395,13 @@
 		C9BB23F1219CE3C800CCE007 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = DWVXMLB45Y;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_STYLE = Manual;
+				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
+				DEVELOPMENT_TEAM = VNH7T7682X;
+				INFOPLIST_FILE = "certificate-sync/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Release;

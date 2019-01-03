@@ -8,7 +8,7 @@
 
 import Foundation
 
-let configurationPath = CommandLine.arguments[1]
+let configurationPath = (CommandLine.arguments[1] as NSString).expandingTildeInPath
 
 let configuration = Configuration.read(path: configurationPath.toFileURL())
 

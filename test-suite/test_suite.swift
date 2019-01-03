@@ -157,9 +157,10 @@ class test_suite: XCTestCase {
         let selfBundle = Bundle(for: type(of: self))
         let imports = configuration.imports.map { (item) -> ImportItem in
             let path = selfBundle.resourceURL?.appendingPathComponent(item.path.lastPathComponent)
+            let label = item.label ?? "certificate-sync imported item"
             
             if item.keychainPath == "demo.keychain" {
-                return ImportItem(path: path!, aclEntries: item.acls, claimOwner: item.claimOwner, keychainPath: demoKeychainPath.absoluteString, password: item.password)
+                return ImportItem(label: label, path: path!, aclEntries: item.acls, claimOwner: item.claimOwner, keychainPath: demoKeychainPath.absoluteString, password: item.password)
             }
             else {
                 return item

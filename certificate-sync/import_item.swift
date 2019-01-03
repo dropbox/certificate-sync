@@ -14,8 +14,10 @@ class ImportItem {
     let claimOwner: Bool
     let keychainPath: String
     let password: String?
+    let label: String?
     
-    init(path: URL, aclEntries: [ ACLConfigurationItem ], claimOwner: Bool, keychainPath: String, password: String?) {
+    init(label: String?, path: URL, aclEntries: [ ACLConfigurationItem ], claimOwner: Bool, keychainPath: String, password: String?) {
+        self.label = label
         self.path = path
         self.acls = aclEntries
         self.claimOwner = claimOwner
@@ -24,6 +26,7 @@ class ImportItem {
     }
     
     static func parse(configuration: [ String : Any ]) -> ImportItem {
+        let label = configuration["label"] as? String
         let path = URL(fileURLWithPath: configuration["path"] as! String)
         let claimOwner = configuration["claim_owner"] as? Bool ?? false
         var keychainPath: String!
@@ -43,6 +46,6 @@ class ImportItem {
             return ACLConfigurationItem.parse(configuration: item)
         }
         
-        return ImportItem(path: path, aclEntries: acls, claimOwner: claimOwner, keychainPath: keychainPath, password: password)
+        return ImportItem(label: label, path: path, aclEntries: acls, claimOwner: claimOwner, keychainPath: keychainPath, password: password)
     }
 }

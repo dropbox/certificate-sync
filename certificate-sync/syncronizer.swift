@@ -130,14 +130,18 @@ class Syncronizer {
         return trustedApplication!
     }
 
-    
     func ensureSelfInOwnerACL(identity: SecIdentity) {
-        var access: SecAccess?
         var privateKey: SecKey?
         
         assert(SecIdentityCopyPrivateKey(identity, &privateKey) == kOSReturnSuccess)
         assert(privateKey != nil)
         
+        let _ = ensureSelfInKeyOwnerACL(privateKey: privateKey!)
+    }
+    
+    func ensureSelfInKeyOwnerACL(privateKey: SecKey, saveResult: Bool = true) -> SecAccess? {
+        var access: SecAccess?
+
         let privateKeyItem = (privateKey as Any) as! SecKeychainItem
         
         assert(SecKeychainItemCopyAccess(privateKeyItem, &access) == kOSReturnSuccess)
@@ -165,8 +169,14 @@ class Syncronizer {
             
             assert(SecACLSetContents(acl, applicationList! as CFArray, description!, promptSelector) == kOSReturnSuccess)
 
-            assert(SecKeychainItemSetAccess(privateKeyItem, access!) == kOSReturnSuccess)
+            if saveResult == true {
+                let setAccessResult = SecKeychainItemSetAccess(privateKeyItem, access!)
+                assert(setAccessResult == kOSReturnSuccess)
+            }
+            return access
         }
+    
+        return nil
     }
     
     private func updateApplicationList(existing: CFArray?, applications: [ SecTrustedApplication ]) -> CFArray {
@@ -197,16 +207,24 @@ class Syncronizer {
     
     func ensureItemHasACL(aclName: String, identity: SecIdentity, acl: [ ACLConfigurationItem ]) {
         var privateKey: SecKey?
-        var access: SecAccess?
-        var aclListArray: CFArray?
         
         assert(SecIdentityCopyPrivateKey(identity, &privateKey) == kOSReturnSuccess)
         assert(privateKey != nil)
         
+        ensureItemKeyHasACL(aclName: aclName, privateKey: privateKey!, acl: acl)
+    }
+    
+    func ensureItemKeyHasACL(aclName: String, privateKey: SecKey, acl: [ ACLConfigurationItem ], access existingAccess: SecAccess? = nil, saveResult: Bool = true) {
+
+        var aclListArray: CFArray?
+        var access = existingAccess
+        
         let privateKeyItem = (privateKey as Any) as! SecKeychainItem
         
-        assert(SecKeychainItemCopyAccess(privateKeyItem, &access) == kOSReturnSuccess)
-        assert(access != nil)
+        if access == nil {
+            assert(SecKeychainItemCopyAccess(privateKeyItem, &access) == kOSReturnSuccess)
+            assert(access != nil)
+        }
         
         assert(SecAccessCopyACLList(access!, &aclListArray) == kOSReturnSuccess)
         assert(aclListArray != nil)
@@ -262,7 +280,9 @@ class Syncronizer {
             assert(SecACLUpdateAuthorizations(newACL!, authorizations) == kOSReturnSuccess)
         }
         
-        assert(SecKeychainItemSetAccess(privateKeyItem, access!) == kOSReturnSuccess)
+        if saveResult == true {
+            assert(SecKeychainItemSetAccess(privateKeyItem, access!) == kOSReturnSuccess)
+        }
     }
     
     func ensureACLContainsApps(aclName: String, items: [ ( configuration: ConfigurationItem, identity: SecIdentity ) ]) {
@@ -284,19 +304,54 @@ class Syncronizer {
             
             var importParameters = SecItemImportExportKeyParameters()
 
-            var resultItems = NSArray.init() as CFArray?
+            var resultItems: CFArray? = NSMutableArray()
             
-            let result = SecItemImport(data!, path as CFString, &externalFormat, &itemType, importFlags, &importParameters, keychain!, &resultItems)
+            let result = SecItemImport(data!, path as CFString, &externalFormat, &itemType, importFlags, &importParameters, nil, &resultItems)
             assert(result == kOSReturnSuccess || result == errSecDuplicateItem)
             
             for importedItem in resultItems as! [ SecKeychainItem ] {
-                if CFGetTypeID(importedItem) == SecIdentityGetTypeID() {
+                var access: SecAccess?
+                
+                if CFGetTypeID(importedItem) == SecKeyGetTypeID() {
+                    let key = (importedItem as Any) as! SecKey
+                    
+                    
                     if importItem.claimOwner {
-                        ensureSelfInOwnerACL(identity: importedItem as! SecIdentity)
+                        access = ensureSelfInKeyOwnerACL(privateKey: key, saveResult: false)
                     }
                     
-                    ensureItemHasACL(aclName: configuration.aclName, identity: importedItem as! SecIdentity, acl: importItem.acls)
+                    ensureItemKeyHasACL(aclName: configuration.aclName, privateKey: key, acl: importItem.acls, access: access, saveResult: false)
                 }
+                
+                var itemClass: CFString?
+                switch CFGetTypeID(importedItem) {
+                case SecKeyGetTypeID():
+                    itemClass = kSecClassKey
+                    break
+                case SecCertificateGetTypeID():
+                    itemClass = kSecClassCertificate
+                    break
+                default:
+                    assert(false, "Unsupported import item classs")
+                }
+                
+                var importQuery: [ String : Any ] = [
+                    kSecClassKey as String: itemClass!,
+                    kSecValueRef as String: importedItem,
+                    kSecUseKeychain as String: keychain!
+                ]
+                
+                if access != nil {
+                    importQuery[kSecAttrAccess as String] = access!
+                }
+                if importItem.label != nil {
+                    importQuery[kSecAttrLabel as String] = importItem.label!
+                }
+                
+                var addReturnValue: CFTypeRef?
+                
+                let addResult = SecItemAdd(importQuery as CFDictionary, &addReturnValue)
+                assert(addResult == kOSReturnSuccess || addResult == errSecDuplicateItem)
             }
         }
     }
